@@ -20,17 +20,29 @@ if (isProd || onVercel) {
       missing.join(", "),
     );
   }
+  const origin =
+    process.env.AUTH_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (!origin) {
+    console.warn(
+      "[auth] AUTH_URL and NEXT_PUBLIC_SITE_URL are both unset — set one to your public origin (e.g. https://knife.rip) for reliable OAuth cookies.",
+    );
+  }
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db),
   trustHost: true,
   secret: process.env.AUTH_SECRET,
-  /** Set AUTH_DEBUG=1 on Vercel temporarily to see full Auth errors in Function logs. */
-  debug: process.env.AUTH_DEBUG === "1",
+  pages: {
+    error: "/auth/error",
+  },
+  /** Local: always. Production: set AUTH_DEBUG=1 on Vercel while troubleshooting. */
+  debug:
+    process.env.NODE_ENV === "development" || process.env.AUTH_DEBUG === "1",
   logger: {
     error(error) {
-      console.error("[auth]", error);
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error("[auth]", err.message, err.cause ?? err.stack);
     },
     warn(code) {
       console.warn("[auth]", code);
@@ -44,6 +56,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn() {
+      return true;
+    },
     session({ session, user }) {
       if (session.user) session.user.id = user.id;
       return session;
