@@ -1,8 +1,13 @@
 import { COMMAND_CATALOG_VERSION } from "../config";
 import { postCommandRegistry } from "../lib/site-client";
 import { avatarCommand } from "./general/avatar";
+import { coinflipCommand } from "./general/coinflip";
 import { helpCommand } from "./general/help";
 import { pingCommand } from "./general/ping";
+import { premiumCommand } from "./general/premium";
+import { serverinfoCommand } from "./general/serverinfo";
+import { uptimeCommand } from "./general/uptime";
+import { userinfoCommand } from "./general/userinfo";
 import type { CommandCategoryShape } from "./site-payload";
 import type { KnifeCommand } from "./types";
 
@@ -12,8 +17,13 @@ import type { KnifeCommand } from "./types";
  */
 export const commandDefinitions: KnifeCommand[] = [
   avatarCommand,
+  coinflipCommand,
   helpCommand,
   pingCommand,
+  premiumCommand,
+  serverinfoCommand,
+  uptimeCommand,
+  userinfoCommand,
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 export function buildCommandMap(
