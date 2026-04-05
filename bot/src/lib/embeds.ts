@@ -4,12 +4,18 @@ import { EmbedBuilder } from "discord.js";
 export function minimalEmbed(params: {
   title: string;
   description: string;
+  /** Large image below the body */
   imageUrl?: string;
+  /** Small image in the top-right (e.g. avatar / server icon) */
+  thumbnailUrl?: string;
 }): EmbedBuilder {
   const b = new EmbedBuilder()
     .setTitle(params.title)
     .setDescription(params.description)
     .setColor(0x2b2d31);
+  if (params.thumbnailUrl) {
+    b.setThumbnail(params.thumbnailUrl);
+  }
   if (params.imageUrl) {
     b.setImage(params.imageUrl);
   }

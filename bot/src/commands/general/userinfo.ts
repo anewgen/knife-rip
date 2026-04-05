@@ -47,11 +47,14 @@ export const userinfoCommand: KnifeCommand = {
       }
     }
 
+    const avatarUrl = user.displayAvatarURL({ size: 256, extension: "png" });
+
     await message.reply({
       embeds: [
         minimalEmbed({
           title: `User — ${display}`,
           description: lines.join("\n"),
+          thumbnailUrl: avatarUrl,
         }),
       ],
     });
