@@ -7,9 +7,9 @@ import {
 import { buildCommandMap, syncRegistryToSite } from "./commands";
 import { PREFIX, getDiscordToken } from "./config";
 import {
-  clearAfkOnAuthorMessage,
-  notifyAfkMentions,
-} from "./lib/afk";
+  handleAfkAuthorReturn,
+  handleAfkMentionReplies,
+} from "./lib/afk/message-flow";
 import { allowPrefixCommand } from "./lib/command-cooldown";
 import { errorEmbed } from "./lib/embeds";
 import { acquireSingleInstanceLock } from "./lib/single-instance";
@@ -41,8 +41,8 @@ client.once(Events.ClientReady, async (c) => {
 client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return;
 
-  clearAfkOnAuthorMessage(message);
-  await notifyAfkMentions(message);
+  await handleAfkAuthorReturn(message);
+  await handleAfkMentionReplies(message);
 
   const content = message.content;
   if (!content.startsWith(PREFIX)) return;

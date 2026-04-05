@@ -18,8 +18,9 @@ export type CanonicalCommandSiteRow = {
 const CANONICAL_UNSORTED: CanonicalCommandSiteRow[] = [
   {
     name: "afk",
-    description: "Set an AFK note; auto-reply when you're mentioned",
-    usage: ".afk [note] · .afk clear",
+    description:
+      "Set AFK with optional reason (default AFK); welcome back + ping replies",
+    usage: ".afk [reason] · .afk clear",
     tier: "free",
     style: "prefix",
     categoryId: "utility",

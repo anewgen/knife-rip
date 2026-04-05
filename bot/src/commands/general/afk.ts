@@ -1,18 +1,18 @@
-import {
-  clearAfkState,
-  setAfkState,
-} from "../../lib/afk";
+import { clearAfkEntry, setAfkEntry } from "../../lib/afk/store";
 import { minimalEmbed } from "../../lib/embeds";
 import type { KnifeCommand } from "../types";
 
+const DEFAULT_REASON = "AFK";
+
 export const afkCommand: KnifeCommand = {
   name: "afk",
-  description: "Set an AFK note; auto-reply when you're mentioned",
+  description:
+    "Set AFK with an optional reason (default “AFK”); auto-reply + welcome back when you return",
   site: {
     categoryId: "utility",
     categoryTitle: "Utility",
     categoryDescription: "Quick tools and light fun.",
-    usage: ".afk [note] · .afk clear",
+    usage: ".afk [reason] · .afk clear",
     tier: "free",
     style: "prefix",
   },
@@ -21,8 +21,8 @@ export const afkCommand: KnifeCommand = {
     const uid = message.author.id;
 
     const sub = args[0]?.toLowerCase();
-    if (args.length === 0 || sub === "clear" || sub === "off") {
-      const had = clearAfkState(guildId, uid);
+    if (sub === "clear" || sub === "off") {
+      const had = clearAfkEntry(guildId, uid);
       await message.reply({
         embeds: [
           minimalEmbed({
@@ -36,26 +36,20 @@ export const afkCommand: KnifeCommand = {
       return;
     }
 
-    const note = args.join(" ").trim();
-    if (!note) {
-      await message.reply({
-        embeds: [
-          minimalEmbed({
-            title: "AFK",
-            description:
-              "Add a short note, e.g. `.afk eating`, or use `.afk clear`.",
-          }),
-        ],
-      });
-      return;
-    }
+    const reason =
+      args.length === 0
+        ? DEFAULT_REASON
+        : args.join(" ").trim().slice(0, 200) || DEFAULT_REASON;
 
-    setAfkState(guildId, uid, note);
+    setAfkEntry(guildId, uid, reason);
     await message.reply({
       embeds: [
         minimalEmbed({
           title: "AFK",
-          description: `You're now AFK — **${note}**. I'll mention it when someone pings you.`,
+          description:
+            reason === DEFAULT_REASON && args.length === 0
+              ? `You're now AFK (**${DEFAULT_REASON}**). I'll reply when someone pings you.`
+              : `You're now AFK — **${reason}**. I'll reply when someone pings you.`,
         }),
       ],
     });
