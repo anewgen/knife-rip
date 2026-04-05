@@ -8,6 +8,7 @@ import { premiumCommand } from "./general/premium";
 import { serverinfoCommand } from "./general/serverinfo";
 import { uptimeCommand } from "./general/uptime";
 import { userinfoCommand } from "./general/userinfo";
+import { sayCommand } from "./moderation/say";
 import type { CommandCategoryShape } from "./site-payload";
 import type { KnifeCommand } from "./types";
 
@@ -21,6 +22,7 @@ export const commandDefinitions: KnifeCommand[] = [
   helpCommand,
   pingCommand,
   premiumCommand,
+  sayCommand,
   serverinfoCommand,
   uptimeCommand,
   userinfoCommand,
