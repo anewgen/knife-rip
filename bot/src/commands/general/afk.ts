@@ -42,14 +42,16 @@ export const afkCommand: KnifeCommand = {
         : args.join(" ").trim().slice(0, 200) || DEFAULT_REASON;
 
     setAfkEntry(guildId, uid, reason);
+    const description =
+      reason === DEFAULT_REASON && args.length === 0
+        ? "I'll reply when someone pings you."
+        : `**${reason}** — I'll reply when someone pings you.`;
+
     await message.reply({
       embeds: [
         minimalEmbed({
           title: "AFK",
-          description:
-            reason === DEFAULT_REASON && args.length === 0
-              ? `You're now AFK (**${DEFAULT_REASON}**). I'll reply when someone pings you.`
-              : `You're now AFK — **${reason}**. I'll reply when someone pings you.`,
+          description,
         }),
       ],
     });
