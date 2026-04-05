@@ -1,4 +1,5 @@
 import {
+  deleteDiscordPrivilege,
   isBotOwnerDiscordIdResolved,
   upsertDiscordPrivilege,
 } from "@/lib/discord-privilege";
@@ -11,6 +12,7 @@ type HandoutBody = {
   actorDiscordId: string;
   targetDiscordId: string;
   kind: "OWNER" | "PREMIUM";
+  action: "add" | "remove";
 };
 
 function parseSnowflake(s: string): string | null {
@@ -18,20 +20,28 @@ function parseSnowflake(s: string): string | null {
   return /^\d{17,20}$/.test(t) ? t : null;
 }
 
-export async function POST(req: NextRequest) {
-  const expected = process.env.BOT_INTERNAL_SECRET;
+function authFailureResponse(
+  expected: string | undefined,
+  req: NextRequest,
+): NextResponse | null {
   if (!expected) {
     return NextResponse.json(
       { error: "BOT_INTERNAL_SECRET not configured" },
       { status: 503 },
     );
   }
-
   const auth = req.headers.get("authorization");
   const token = auth?.startsWith("Bearer ") ? auth.slice(7) : null;
   if (!token || token !== expected) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  return null;
+}
+
+export async function POST(req: NextRequest) {
+  const expected = process.env.BOT_INTERNAL_SECRET;
+  const authErr = authFailureResponse(expected, req);
+  if (authErr) return authErr;
 
   let body: HandoutBody;
   try {
@@ -43,6 +53,7 @@ export async function POST(req: NextRequest) {
   const actor = parseSnowflake(body.actorDiscordId ?? "");
   const target = parseSnowflake(body.targetDiscordId ?? "");
   const kindRaw = body.kind;
+  const action = body.action;
 
   if (!actor || !target) {
     return NextResponse.json(
@@ -54,6 +65,13 @@ export async function POST(req: NextRequest) {
   if (kindRaw !== "OWNER" && kindRaw !== "PREMIUM") {
     return NextResponse.json(
       { error: "kind must be OWNER or PREMIUM" },
+      { status: 400 },
+    );
+  }
+
+  if (action !== "add" && action !== "remove") {
+    return NextResponse.json(
+      { error: "action must be add or remove" },
       { status: 400 },
     );
   }
@@ -71,15 +89,30 @@ export async function POST(req: NextRequest) {
       ? DiscordPrivilegeKind.OWNER
       : DiscordPrivilegeKind.PREMIUM;
 
-  await upsertDiscordPrivilege({
+  if (action === "add") {
+    await upsertDiscordPrivilege({
+      discordUserId: target,
+      kind,
+      grantedByDiscordId: actor,
+    });
+    return NextResponse.json({
+      ok: true,
+      targetDiscordId: target,
+      kind: kindRaw,
+      action: "add",
+    });
+  }
+
+  const removed = await deleteDiscordPrivilege({
     discordUserId: target,
     kind,
-    grantedByDiscordId: actor,
   });
 
   return NextResponse.json({
     ok: true,
     targetDiscordId: target,
     kind: kindRaw,
+    action: "remove",
+    removed,
   });
 }

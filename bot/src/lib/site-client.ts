@@ -85,11 +85,18 @@ export async function fetchPremiumFromSite(
   return premium;
 }
 
+export type HandoutApiResult = {
+  ok: boolean;
+  action: "add" | "remove";
+  removed?: boolean;
+};
+
 export async function postHandoutToSite(body: {
   actorDiscordId: string;
   targetDiscordId: string;
   kind: "OWNER" | "PREMIUM";
-}): Promise<void> {
+  action: "add" | "remove";
+}): Promise<HandoutApiResult> {
   const secret = getBotInternalSecret();
   if (!secret) {
     throw new Error("BOT_INTERNAL_SECRET is not set");
@@ -120,6 +127,8 @@ export async function postHandoutToSite(body: {
     const text = await res.text();
     throw new Error(`Handout API ${res.status}: ${text.slice(0, 200)}`);
   }
+
+  return (await res.json()) as HandoutApiResult;
 }
 
 /**

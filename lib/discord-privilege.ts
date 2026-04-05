@@ -62,3 +62,17 @@ export async function upsertDiscordPrivilege(params: {
     },
   });
 }
+
+/** Removes a DB handout row only (static lists in code are unchanged). */
+export async function deleteDiscordPrivilege(params: {
+  discordUserId: string;
+  kind: DiscordPrivilegeKind;
+}): Promise<boolean> {
+  const r = await db.discordPrivilege.deleteMany({
+    where: {
+      discordUserId: params.discordUserId,
+      kind: params.kind,
+    },
+  });
+  return r.count > 0;
+}
