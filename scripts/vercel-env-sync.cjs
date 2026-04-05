@@ -51,19 +51,22 @@ for (const line of lines) {
   pairs.push({ key, value });
 }
 
-const sensitiveRe =
-  /SECRET|TOKEN|PASSWORD|DATABASE_URL|WEBHOOK|INTERNAL|KEY$/i;
-
 const targets =
   process.env.SYNC_PREVIEW === "0"
     ? ["production"]
     : ["production", "preview"];
 
+function isSensitiveKey(key) {
+  if (key === "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY") return false;
+  return (
+    /SECRET|TOKEN|PASSWORD|DATABASE_URL|WEBHOOK|INTERNAL|DISCORD_BOT_TOKEN/i.test(
+      key,
+    ) || key === "DISCORD_CLIENT_SECRET" || key === "STRIPE_SECRET_KEY"
+  );
+}
+
 function runAdd(key, value, target) {
-  const sensitive =
-    sensitiveRe.test(key) ||
-    key === "DISCORD_CLIENT_SECRET" ||
-    key === "STRIPE_SECRET_KEY";
+  const sensitive = isSensitiveKey(key);
 
   const args = ["vercel", "env", "add", key, target];
   if (sensitive) args.push("--sensitive");
