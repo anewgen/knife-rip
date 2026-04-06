@@ -13,8 +13,6 @@ import { robloxCommand } from "./general/roblox";
 import { roleinfoCommand } from "./general/roleinfo";
 import { serverinfoCommand } from "./general/serverinfo";
 import { tiktokCommand } from "./general/tiktok";
-import { ttsCommand } from "./general/tts";
-import { ttsJoinCommand, ttsLeaveCommand } from "./general/vc-tts";
 import { uptimeCommand } from "./general/uptime";
 import { userinfoCommand } from "./general/userinfo";
 import { handoutCommand } from "./moderation/handout";
@@ -42,9 +40,6 @@ export const commandDefinitions: KnifeCommand[] = [
   sayCommand,
   serverinfoCommand,
   tiktokCommand,
-  ttsCommand,
-  ttsJoinCommand,
-  ttsLeaveCommand,
   uptimeCommand,
   userinfoCommand,
 ].sort((a, b) => a.name.localeCompare(b.name));

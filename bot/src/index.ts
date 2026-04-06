@@ -18,7 +18,6 @@ import {
   syncKnifeRipRolesForDiscordUser,
 } from "./lib/privilege-role-sync";
 import { acquireSingleInstanceLock } from "./lib/single-instance";
-import { handleVcTtsMessage } from "./lib/vc-tts/message-handler";
 
 acquireSingleInstanceLock();
 
@@ -79,10 +78,6 @@ client.on(Events.MessageCreate, async (message) => {
 
   await handleAfkAuthorReturn(message);
   await handleAfkMentionReplies(message);
-
-  if (handleVcTtsMessage(message)) {
-    return;
-  }
 
   const content = message.content;
   if (!content.startsWith(PREFIX)) return;
