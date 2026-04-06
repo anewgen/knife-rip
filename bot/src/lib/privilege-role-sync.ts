@@ -42,6 +42,9 @@ export async function reconcileKnifeRipSuspectRoles(client: Client): Promise<voi
   if (!guild) return;
 
   const suspects = new Set<string>();
+  guild.roles.cache.get(env.developerRoleId)?.members.forEach((m) => {
+    suspects.add(m.id);
+  });
   guild.roles.cache.get(env.ownerRoleId)?.members.forEach((m) => {
     suspects.add(m.id);
   });

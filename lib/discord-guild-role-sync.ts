@@ -1,54 +1,90 @@
 const DISCORD_API = "https://discord.com/api/v10";
 
+/** knife.rip hub — override with `KNIFE_RIP_*_ROLE_ID` if roles are recreated. */
+export const KNIFE_RIP_DEFAULT_PREMIUM_ROLE_ID = "1490510690429964379";
+export const KNIFE_RIP_DEFAULT_OWNER_ROLE_ID = "1490510979380023446";
+export const KNIFE_RIP_DEFAULT_DEVELOPER_ROLE_ID = "1490510979157594243";
+
 export type KnifeRipPrivilegeSyncEnv = {
   guildId: string;
-  ownerRoleId: string;
   premiumRoleId: string;
+  ownerRoleId: string;
+  developerRoleId: string;
 };
 
-/**
- * knife.rip community: sync Discord roles with site entitlement (Stripe + handouts + static lists).
- * Set all three on Vercel and on the bot host. Bot role must sit above these roles in the hierarchy.
- */
-export function getKnifeRipPrivilegeSyncEnv(): KnifeRipPrivilegeSyncEnv | null {
-  const guildId = process.env.KNIFE_RIP_GUILD_ID?.trim();
-  const ownerRoleId = process.env.KNIFE_RIP_OWNER_ROLE_ID?.trim();
-  const premiumRoleId = process.env.KNIFE_RIP_PREMIUM_ROLE_ID?.trim();
-  if (!guildId || !ownerRoleId || !premiumRoleId) return null;
-  if (!/^\d{17,20}$/.test(guildId)) return null;
-  if (!/^\d{17,20}$/.test(ownerRoleId)) return null;
-  if (!/^\d{17,20}$/.test(premiumRoleId)) return null;
-  return { guildId, ownerRoleId, premiumRoleId };
+function snowflakeOrDefault(
+  raw: string | undefined,
+  fallback: string,
+): string | null {
+  const v = (raw?.trim() || fallback).trim();
+  return /^\d{17,20}$/.test(v) ? v : null;
 }
 
 /**
- * Owners get the owner role only (hoisted “staff” tag). Everyone else with Pro gets the premium role.
+ * knife.rip community: sync Discord roles with site entitlement.
+ * Set **KNIFE_RIP_GUILD_ID** (server id). Role IDs default to the live knife.rip roles unless overridden.
+ * Bot role must sit above these roles in the hierarchy.
+ */
+export function getKnifeRipPrivilegeSyncEnv(): KnifeRipPrivilegeSyncEnv | null {
+  const guildId = process.env.KNIFE_RIP_GUILD_ID?.trim();
+  if (!guildId || !/^\d{17,20}$/.test(guildId)) return null;
+
+  const premiumRoleId = snowflakeOrDefault(
+    process.env.KNIFE_RIP_PREMIUM_ROLE_ID,
+    KNIFE_RIP_DEFAULT_PREMIUM_ROLE_ID,
+  );
+  const ownerRoleId = snowflakeOrDefault(
+    process.env.KNIFE_RIP_OWNER_ROLE_ID,
+    KNIFE_RIP_DEFAULT_OWNER_ROLE_ID,
+  );
+  const developerRoleId = snowflakeOrDefault(
+    process.env.KNIFE_RIP_DEVELOPER_ROLE_ID,
+    KNIFE_RIP_DEFAULT_DEVELOPER_ROLE_ID,
+  );
+  if (!premiumRoleId || !ownerRoleId || !developerRoleId) return null;
+
+  return {
+    guildId,
+    premiumRoleId,
+    ownerRoleId,
+    developerRoleId,
+  };
+}
+
+/** Shapes from {@link getEntitlementForDiscordUserId} for role mapping. */
+export type EntitlementForDiscordRoles = {
+  developer: boolean;
+  owner: boolean;
+  premium: boolean;
+};
+
+/**
+ * Developer → developer role only. Non-dev owner tier → owner role only. Pro without owner tier → premium only.
  */
 export function computePrivilegeRoleDelta(
-  ent: { owner: boolean; premium: boolean },
+  ent: EntitlementForDiscordRoles,
   env: KnifeRipPrivilegeSyncEnv,
   currentRoleIds: readonly string[],
 ): { add: string[]; remove: string[] } {
-  const { ownerRoleId, premiumRoleId } = env;
-  const wantOwner = ent.owner;
+  const { developerRoleId, ownerRoleId, premiumRoleId } = env;
+
+  const wantDeveloper = ent.developer;
+  const wantOwner = ent.owner && !ent.developer;
   const wantPremium = ent.premium && !ent.owner;
 
-  const hasOwner = currentRoleIds.includes(ownerRoleId);
-  const hasPremium = currentRoleIds.includes(premiumRoleId);
+  const managed = [developerRoleId, ownerRoleId, premiumRoleId] as const;
+  const shouldHave = new Set<string>();
+  if (wantDeveloper) shouldHave.add(developerRoleId);
+  if (wantOwner) shouldHave.add(ownerRoleId);
+  if (wantPremium) shouldHave.add(premiumRoleId);
 
   const add: string[] = [];
   const remove: string[] = [];
-
-  if (wantOwner) {
-    if (!hasOwner) add.push(ownerRoleId);
-    if (hasPremium) remove.push(premiumRoleId);
-  } else {
-    if (hasOwner) remove.push(ownerRoleId);
-    if (wantPremium) {
-      if (!hasPremium) add.push(premiumRoleId);
-    } else if (hasPremium) {
-      remove.push(premiumRoleId);
-    }
+  for (const id of managed) {
+    const has = currentRoleIds.includes(id);
+    const want = shouldHave.has(id);
+    if (want && !has) add.push(id);
+    if (!want && has) remove.push(id);
   }
 
   return { add, remove };
@@ -136,7 +172,7 @@ export async function syncKnifeRipPrivilegeRolesFromEntitlement(
   botToken: string,
   env: KnifeRipPrivilegeSyncEnv,
   discordUserId: string,
-  ent: { owner: boolean; premium: boolean },
+  ent: EntitlementForDiscordRoles,
 ): Promise<
   { ok: true; skipped?: "not_member" | "no_change" } | { ok: false; detail: string }
 > {

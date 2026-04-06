@@ -67,6 +67,7 @@ async function siteFetch(
 export type EntitlementResponse = {
   premium: boolean;
   owner: boolean;
+  developer: boolean;
   discordUserId: string;
 };
 
@@ -130,6 +131,7 @@ export async function fetchEntitlementFromSite(
   const normalized: EntitlementResponse = {
     premium: Boolean(data.premium),
     owner: Boolean(data.owner),
+    developer: Boolean(data.developer),
     discordUserId: data.discordUserId ?? discordUserId,
   };
 

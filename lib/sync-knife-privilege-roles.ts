@@ -28,7 +28,7 @@ export async function syncKnifeRipDiscordRolesForDiscordUser(
       state: "disabled",
       detail: !token
         ? "DISCORD_BOT_TOKEN missing"
-        : "KNIFE_RIP_GUILD_ID / role IDs not fully set",
+        : "KNIFE_RIP_GUILD_ID not set (role IDs have defaults)",
     };
   }
 

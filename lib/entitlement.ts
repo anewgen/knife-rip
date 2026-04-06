@@ -1,3 +1,4 @@
+import { isDeveloperDiscordId } from "@/lib/bot-developers";
 import {
   isBotOwnerDiscordIdResolved,
   isKnifePremiumResolved,
@@ -5,19 +6,28 @@ import {
 import { db } from "@/lib/db";
 import { hasPremiumAccess } from "@/lib/premium";
 
+export type DiscordEntitlement = {
+  premium: boolean;
+  /** Bot owner tier (includes developers). */
+  owner: boolean;
+  /** Developer list / env — used for Discord staff role sync. */
+  developer: boolean;
+};
+
 /**
- * Bot + site: Pro (bypass, purchase, or sub) and owner (static + DB).
+ * Bot + site: Pro (bypass, purchase, or sub), owner tier, and developer flag.
  * Single pass — avoids duplicate privilege queries per request.
  */
 export async function getEntitlementForDiscordUserId(
   discordUserId: string,
-): Promise<{ premium: boolean; owner: boolean }> {
+): Promise<DiscordEntitlement> {
+  const developer = isDeveloperDiscordId(discordUserId);
   const owner = await isBotOwnerDiscordIdResolved(discordUserId);
   if (owner) {
-    return { premium: true, owner: true };
+    return { premium: true, owner: true, developer };
   }
   if (await isKnifePremiumResolved(discordUserId)) {
-    return { premium: true, owner: false };
+    return { premium: true, owner: false, developer };
   }
 
   const account = await db.account.findFirst({
@@ -28,7 +38,7 @@ export async function getEntitlementForDiscordUserId(
   });
 
   const premium = hasPremiumAccess(account?.user ?? null);
-  return { premium, owner: false };
+  return { premium, owner: false, developer };
 }
 
 /**

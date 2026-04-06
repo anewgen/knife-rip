@@ -45,7 +45,7 @@ client.once(Events.ClientReady, async (c) => {
     );
   } else {
     console.log(
-      "Privilege Discord sync: off — set KNIFE_RIP_GUILD_ID, KNIFE_RIP_OWNER_ROLE_ID, KNIFE_RIP_PREMIUM_ROLE_ID",
+      "Privilege Discord sync: off — set KNIFE_RIP_GUILD_ID (Pro/Owner/Dev role IDs default to knife.rip hub)",
     );
   }
   try {

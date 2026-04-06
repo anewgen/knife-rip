@@ -26,7 +26,12 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const { premium, owner } =
+  const { premium, owner, developer } =
     await getEntitlementForDiscordUserId(discordUserId);
-  return NextResponse.json({ premium, owner, discordUserId });
+  return NextResponse.json({
+    premium,
+    owner,
+    developer,
+    discordUserId,
+  });
 }

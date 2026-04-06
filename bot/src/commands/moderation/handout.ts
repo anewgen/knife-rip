@@ -54,7 +54,7 @@ function roleSyncFootnote(rs: HandoutRoleSync | undefined): string {
     case "not_member":
       return "\n\n**Discord:** User is not in the configured server — roles skipped.";
     case "disabled":
-      return `\n\n**Discord:** Role sync disabled (${rs.detail ?? "set KNIFE_RIP_* + DISCORD_BOT_TOKEN on the site"}).`;
+      return `\n\n**Discord:** Role sync disabled (${rs.detail ?? "set KNIFE_RIP_GUILD_ID + DISCORD_BOT_TOKEN on the site"}).`;
     case "error":
       return `\n\n**Discord:** Role sync failed — ${rs.detail}`;
     default:
