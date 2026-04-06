@@ -10,7 +10,12 @@ import {
   type AudioPlayer,
   type VoiceConnection,
 } from "@discordjs/voice";
-import type { Guild, GuildMember, VoiceBasedChannel } from "discord.js";
+import {
+  PermissionFlagsBits,
+  type Guild,
+  type GuildMember,
+  type VoiceBasedChannel,
+} from "discord.js";
 import { spawn } from "node:child_process";
 import ffmpegStatic from "ffmpeg-static";
 import { synthesizeSpeechMp3 } from "../tts-edge";
@@ -18,6 +23,8 @@ import { synthesizeSpeechMp3 } from "../tts-edge";
 type Session = {
   connection: VoiceConnection;
   player: AudioPlayer;
+  /** Same id as the voice channel — text-in-VC messages use this channel id. */
+  voiceChannelId: string;
   queue: string[];
   busy: boolean;
 };
@@ -37,7 +44,7 @@ function mp3BufferToAudioResource(mp3: Buffer) {
       "-analyzeduration",
       "0",
       "-loglevel",
-      "0",
+      "error",
       "-f",
       "s16le",
       "-ar",
@@ -46,8 +53,18 @@ function mp3BufferToAudioResource(mp3: Buffer) {
       "2",
       "pipe:1",
     ],
-    { stdio: ["pipe", "pipe", "ignore"] },
+    { stdio: ["pipe", "pipe", "pipe"] },
   );
+  let ffmpegErr = "";
+  proc.stderr?.on("data", (chunk: Buffer) => {
+    ffmpegErr += chunk.toString();
+    if (ffmpegErr.length > 800) ffmpegErr = ffmpegErr.slice(-800);
+  });
+  proc.on("close", (code) => {
+    if (code !== 0 && code != null) {
+      console.error("[vc-tts] ffmpeg failed:", code, ffmpegErr.trim());
+    }
+  });
   proc.stdin.end(mp3);
   return createAudioResource(proc.stdout, {
     inputType: StreamType.Raw,
@@ -88,25 +105,34 @@ export function isVoiceTtsActiveInGuild(guildId: string): boolean {
   return getVoiceConnection(guildId) != null && sessions.has(guildId);
 }
 
+/** Channel id to listen on for VC TTS (voice channel’s built-in chat). */
+export function getVoiceTtsListenChannelId(
+  guildId: string,
+): string | undefined {
+  return sessions.get(guildId)?.voiceChannelId;
+}
+
 export async function joinVoiceForTts(
   guild: Guild,
   voiceChannel: VoiceBasedChannel,
   _member: GuildMember,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const me = guild.members.me;
-  if (!me?.voice) {
+  if (!me) {
     return { ok: false, error: "Bot member not available." };
   }
 
   const perms = voiceChannel.permissionsFor(me);
-  if (
-    !perms?.has(["Connect", "Speak", "ViewChannel"]) ||
-    !voiceChannel.joinable
-  ) {
+  const need = [
+    PermissionFlagsBits.ViewChannel,
+    PermissionFlagsBits.Connect,
+    PermissionFlagsBits.Speak,
+  ] as const;
+  if (!perms?.has(need) || !voiceChannel.joinable) {
     return {
       ok: false,
       error:
-        "I need **Connect**, **Speak**, and **View Channel** in that voice channel.",
+        "I need **View Channel**, **Connect**, and **Speak** on that voice channel (to read its chat and stream TTS audio).",
     };
   }
 
@@ -130,11 +156,13 @@ export async function joinVoiceForTts(
   }
 
   const player = createAudioPlayer();
+  // Streams PCM into Discord’s voice gateway — what users hear as the bot speaking.
   connection.subscribe(player);
 
   sessions.set(guild.id, {
     connection,
     player,
+    voiceChannelId: voiceChannel.id,
     queue: [],
     busy: false,
   });
