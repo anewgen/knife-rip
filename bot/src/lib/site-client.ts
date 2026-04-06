@@ -149,10 +149,20 @@ export async function fetchPremiumFromSite(
   return premium;
 }
 
+/** Mirrors site `KnifeRipDiscordRoleSyncReport` — handout response after DB write. */
+export type HandoutRoleSync = {
+  state: "disabled" | "applied" | "no_change" | "not_member" | "error";
+  detail?: string;
+};
+
 export type HandoutApiResult = {
   ok: boolean;
   action: "add" | "remove";
   removed?: boolean;
+  removedFromDatabase?: boolean;
+  revokedBootstrapOwner?: boolean;
+  bootstrapRevoke?: "revoked" | "already_revoked" | "not_static" | null;
+  roleSync?: HandoutRoleSync;
 };
 
 export async function postHandoutToSite(body: {

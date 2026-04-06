@@ -103,3 +103,10 @@ model DiscordPrivilege {
   @@unique([discordUserId, kind])
   @@index([discordUserId])
 }
+
+/// Developer-only: opt out a Discord ID from `lib/bot-owners.ts` without redeploying.
+model BootstrapOwnerRevocation {
+  discordUserId        String   @id
+  revokedByDiscordId String?
+  createdAt            DateTime @default(now())
+}

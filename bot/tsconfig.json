@@ -14,6 +14,7 @@
     "src/**/*.ts",
     "../lib/bot-developers.ts",
     "../lib/bot-owners.ts",
-    "../lib/knife-premium.ts"
+    "../lib/knife-premium.ts",
+    "../lib/discord-guild-role-sync.ts"
   ]
 }

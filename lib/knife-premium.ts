@@ -1,10 +1,10 @@
 /**
  * Static complimentary Knife Pro Discord IDs (optional bootstrap list).
  *
- * For runtime grants without deploy, use **`.handout premium @user`** (see `DiscordPrivilege` in
- * Prisma). Entitlement merges this array with the database.
+ * **Intentionally empty** — use **`.handout @user add premium`** (`DiscordPrivilege`) or Stripe
+ * checkout. No hardcoded Pro bypasses except owners/developers via their own modules.
  *
- * These users are Pro on the **site** and **bot** via `GET /api/internal/entitlement`.
+ * These users would be Pro on the **site** and **bot** via `GET /api/internal/entitlement`.
  * They do **not** get bot **owner** perks — use **`.handout owner`** or `lib/bot-owners.ts`.
  */
 export const KNIFE_PREMIUM_DISCORD_IDS: readonly string[] = [];

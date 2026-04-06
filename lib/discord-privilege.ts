@@ -16,15 +16,33 @@ async function hasDbPrivilege(
   return row != null;
 }
 
+async function isStaticBootstrapOwnerRevoked(
+  discordUserId: string,
+): Promise<boolean> {
+  const row = await db.bootstrapOwnerRevocation.findUnique({
+    where: { discordUserId },
+  });
+  return row != null;
+}
+
 /**
  * Bot owner tier (Developer ∪ static owners ∪ DB `.handout owner`) — cooldown bypass, Pro, `.say`, etc.
+ * Static file owners can be revoked in DB (`BootstrapOwnerRevocation`) by a Developer.
  */
 export async function isBotOwnerDiscordIdResolved(
   discordUserId: string,
 ): Promise<boolean> {
   if (isDeveloperDiscordId(discordUserId)) return true;
-  if (isStaticBotOwner(discordUserId)) return true;
-  return hasDbPrivilege(discordUserId, DiscordPrivilegeKind.OWNER);
+  if (await hasDbPrivilege(discordUserId, DiscordPrivilegeKind.OWNER)) {
+    return true;
+  }
+  if (
+    isStaticBotOwner(discordUserId) &&
+    !(await isStaticBootstrapOwnerRevoked(discordUserId))
+  ) {
+    return true;
+  }
+  return false;
 }
 
 /**
@@ -34,8 +52,46 @@ export async function isRegularOwnerResolved(
   discordUserId: string,
 ): Promise<boolean> {
   if (isDeveloperDiscordId(discordUserId)) return false;
-  if (isStaticBotOwner(discordUserId)) return true;
-  return hasDbPrivilege(discordUserId, DiscordPrivilegeKind.OWNER);
+  if (await hasDbPrivilege(discordUserId, DiscordPrivilegeKind.OWNER)) {
+    return true;
+  }
+  if (
+    isStaticBotOwner(discordUserId) &&
+    !(await isStaticBootstrapOwnerRevoked(discordUserId))
+  ) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Developer `.handout remove owner` for IDs in `lib/bot-owners.ts` with no `DiscordPrivilege` row.
+ */
+export async function tryRevokeStaticBootstrapOwner(params: {
+  discordUserId: string;
+  revokedByDiscordId: string | null;
+}): Promise<"revoked" | "already_revoked" | "not_static"> {
+  if (!isStaticBotOwner(params.discordUserId)) return "not_static";
+  const existing = await db.bootstrapOwnerRevocation.findUnique({
+    where: { discordUserId: params.discordUserId },
+  });
+  if (existing) return "already_revoked";
+  await db.bootstrapOwnerRevocation.create({
+    data: {
+      discordUserId: params.discordUserId,
+      revokedByDiscordId: params.revokedByDiscordId,
+    },
+  });
+  return "revoked";
+}
+
+/** Clears a bootstrap revocation (e.g. after `.handout add owner`). */
+export async function clearBootstrapOwnerRevocation(
+  discordUserId: string,
+): Promise<void> {
+  await db.bootstrapOwnerRevocation.deleteMany({
+    where: { discordUserId },
+  });
 }
 
 /** Complimentary Pro: static `KNIFE_PREMIUM_DISCORD_IDS` and/or DB row (`.handout premium`). */

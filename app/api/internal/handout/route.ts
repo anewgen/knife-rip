@@ -1,9 +1,12 @@
 import { isDeveloperDiscordId } from "@/lib/bot-developers";
 import {
+  clearBootstrapOwnerRevocation,
   deleteDiscordPrivilege,
   isBotOwnerDiscordIdResolved,
+  tryRevokeStaticBootstrapOwner,
   upsertDiscordPrivilege,
 } from "@/lib/discord-privilege";
+import { syncKnifeRipDiscordRolesForDiscordUser } from "@/lib/sync-knife-privilege-roles";
 import { DiscordPrivilegeKind } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -119,18 +122,38 @@ export async function POST(req: NextRequest) {
       kind,
       grantedByDiscordId: actor,
     });
+    if (kindRaw === "OWNER") {
+      await clearBootstrapOwnerRevocation(target);
+    }
+    const roleSync = await syncKnifeRipDiscordRolesForDiscordUser(target);
     return NextResponse.json({
       ok: true,
       targetDiscordId: target,
       kind: kindRaw,
       action: "add",
+      roleSync,
     });
   }
 
-  const removed = await deleteDiscordPrivilege({
+  const removedFromDatabase = await deleteDiscordPrivilege({
     discordUserId: target,
     kind,
   });
+
+  let bootstrapRevoke: "revoked" | "already_revoked" | "not_static" | null =
+    null;
+  if (kindRaw === "OWNER" && actorIsDev) {
+    bootstrapRevoke = await tryRevokeStaticBootstrapOwner({
+      discordUserId: target,
+      revokedByDiscordId: actor,
+    });
+  }
+
+  const revokedBootstrapOwner =
+    kindRaw === "OWNER" && bootstrapRevoke === "revoked";
+  const removed = removedFromDatabase || revokedBootstrapOwner;
+
+  const roleSync = await syncKnifeRipDiscordRolesForDiscordUser(target);
 
   return NextResponse.json({
     ok: true,
@@ -138,5 +161,9 @@ export async function POST(req: NextRequest) {
     kind: kindRaw,
     action: "remove",
     removed,
+    removedFromDatabase,
+    revokedBootstrapOwner,
+    bootstrapRevoke: kindRaw === "OWNER" ? bootstrapRevoke : null,
+    roleSync,
   });
 }

@@ -8,6 +8,7 @@ import {
   fetchEntitlementFromSite,
   invalidateEntitlementCache,
   postHandoutToSite,
+  type HandoutRoleSync,
 } from "../../lib/site-client";
 import type { KnifeCommand } from "../types";
 
@@ -41,6 +42,24 @@ function findActionIndex(
   if (addI >= 0) return { idx: addI, action: "add" };
   if (remI >= 0) return { idx: remI, action: "remove" };
   return null;
+}
+
+function roleSyncFootnote(rs: HandoutRoleSync | undefined): string {
+  if (!rs) return "";
+  switch (rs.state) {
+    case "applied":
+      return "\n\n**Discord:** Roles updated for the knife.rip server.";
+    case "no_change":
+      return "\n\n**Discord:** Roles already matched entitlement.";
+    case "not_member":
+      return "\n\n**Discord:** User is not in the configured server — roles skipped.";
+    case "disabled":
+      return `\n\n**Discord:** Role sync disabled (${rs.detail ?? "set KNIFE_RIP_* + DISCORD_BOT_TOKEN on the site"}).`;
+    case "error":
+      return `\n\n**Discord:** Role sync failed — ${rs.detail}`;
+    default:
+      return "";
+  }
 }
 
 function firstArgLooksLikeUserRef(raw: string | undefined): boolean {
@@ -222,27 +241,54 @@ export const handoutCommand: KnifeCommand = {
     const who =
       target.id === actorId ? "You" : `**${target.username}** (${targetId})`;
 
+    const syncNote = roleSyncFootnote(result.roleSync);
+
     if (action === "add") {
       await message.reply({
         embeds: [
           minimalEmbed({
             title: "Handout added",
             description:
-              `${who} now has **${label}** in the database (plus any static lists in code). Refresh the dashboard if needed.`,
+              `${who} now has **${label}** in the database (plus any static lists in code). Refresh the dashboard if needed.${syncNote}`,
           }),
         ],
       });
       return;
     }
 
-    const hadRow = result.removed === true;
+    const changed = result.removed === true;
+    const dbRow = result.removedFromDatabase === true;
+    const bootOff = result.revokedBootstrapOwner === true;
+    let removeTitle: string;
+    let removeBody: string;
+    if (changed) {
+      removeTitle = "Handout removed";
+      const bits: string[] = [];
+      if (dbRow) {
+        bits.push(`removed **${label}** from the database`);
+      }
+      if (bootOff) {
+        bits.push(
+          "revoked **bootstrap owner** (their ID is still listed in `bot-owners` code, but the site and bot no longer treat them as owner)",
+        );
+      }
+      removeBody =
+        bits.length > 0
+          ? `${who}: ${bits.join("; ")}.`
+          : `${who}: updated.`;
+      removeBody += syncNote;
+    } else {
+      removeTitle = "Nothing to remove";
+      removeBody =
+        kind === "OWNER"
+          ? `${who}: no **${label}** row in the database, and they are not a bootstrap owner (or already revoked).${syncNote}`
+          : `${who}: no **${label}** row in the database (they may only be on a static code list).${syncNote}`;
+    }
     await message.reply({
       embeds: [
         minimalEmbed({
-          title: hadRow ? "Handout removed" : "Nothing to remove",
-          description: hadRow
-            ? `${who}: removed **${label}** from the database. If they’re still on a **static** owner/premium list in code, that still applies.`
-            : `${who}: no **${label}** row in the database (they may only be on a static code list).`,
+          title: removeTitle,
+          description: removeBody,
         }),
       ],
     });

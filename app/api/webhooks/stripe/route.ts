@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { getStripe } from "@/lib/stripe";
+import { syncKnifeRipDiscordRolesForUserId } from "@/lib/sync-knife-privilege-roles";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
@@ -53,6 +54,7 @@ export async function POST(req: Request) {
                 : {}),
             },
           });
+          await syncKnifeRipDiscordRolesForUserId(userId);
         }
         break;
       }
@@ -64,6 +66,10 @@ export async function POST(req: Request) {
       }
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription;
+        const existing = await db.subscription.findFirst({
+          where: { stripeSubscriptionId: sub.id },
+          select: { userId: true },
+        });
         const periodEndSec = subscriptionPeriodEndUnix(sub);
         await db.subscription.updateMany({
           where: { stripeSubscriptionId: sub.id },
@@ -73,6 +79,9 @@ export async function POST(req: Request) {
             currentPeriodEnd: new Date(periodEndSec * 1000),
           },
         });
+        if (existing?.userId) {
+          await syncKnifeRipDiscordRolesForUserId(existing.userId);
+        }
         break;
       }
       default:
@@ -138,4 +147,6 @@ async function syncSubscription(sub: Stripe.Subscription) {
       cancelAtPeriodEnd: sub.cancel_at_period_end,
     },
   });
+
+  await syncKnifeRipDiscordRolesForUserId(userId);
 }

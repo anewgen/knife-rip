@@ -4,6 +4,7 @@ import {
   GatewayIntentBits,
   Partials,
 } from "discord.js";
+import { getKnifeRipPrivilegeSyncEnv } from "../../lib/discord-guild-role-sync";
 import { buildCommandMap, syncRegistryToSite } from "./commands";
 import { PREFIX, getDiscordToken } from "./config";
 import {
@@ -12,6 +13,10 @@ import {
 } from "./lib/afk/message-flow";
 import { allowPrefixCommand } from "./lib/command-cooldown";
 import { errorEmbed } from "./lib/embeds";
+import {
+  reconcileKnifeRipSuspectRoles,
+  syncKnifeRipRolesForDiscordUser,
+} from "./lib/privilege-role-sync";
 import { acquireSingleInstanceLock } from "./lib/single-instance";
 
 acquireSingleInstanceLock();
@@ -21,6 +26,7 @@ const commands = buildCommandMap();
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.DirectMessages,
@@ -28,13 +34,41 @@ const client = new Client({
   partials: [Partials.Channel],
 });
 
+const PRIVILEGE_RECONCILE_MS = 20 * 60 * 1000;
+
 client.once(Events.ClientReady, async (c) => {
   console.log(`Knife ready as ${c.user.tag} — prefix "${PREFIX}"`);
+  const rip = getKnifeRipPrivilegeSyncEnv();
+  if (rip) {
+    console.log(
+      `Privilege Discord sync: guild ${rip.guildId} (reconcile every ${PRIVILEGE_RECONCILE_MS / 60000} min)`,
+    );
+  } else {
+    console.log(
+      "Privilege Discord sync: off — set KNIFE_RIP_GUILD_ID, KNIFE_RIP_OWNER_ROLE_ID, KNIFE_RIP_PREMIUM_ROLE_ID",
+    );
+  }
   try {
     await syncRegistryToSite();
     console.log("Command catalog synced to site.");
   } catch (err) {
     console.warn("Command catalog sync failed:", err);
+  }
+
+  setInterval(() => {
+    reconcileKnifeRipSuspectRoles(c).catch((err) =>
+      console.warn("Privilege role reconcile failed:", err),
+    );
+  }, PRIVILEGE_RECONCILE_MS);
+  reconcileKnifeRipSuspectRoles(c).catch((err) =>
+    console.warn("Privilege role reconcile failed:", err),
+  );
+});
+
+client.on(Events.GuildMemberAdd, (member) => {
+  const env = getKnifeRipPrivilegeSyncEnv();
+  if (env && member.guild.id === env.guildId) {
+    void syncKnifeRipRolesForDiscordUser(member.id);
   }
 });
 
@@ -81,9 +115,9 @@ client.login(token).catch((e: unknown) => {
   const msg = e instanceof Error ? e.message : String(e);
   if (msg.includes("disallowed intents")) {
     console.error(
-      "\nKnife needs Message Content Intent for prefix commands.\n" +
-        "Discord Developer Portal → your app → Bot → Privileged Gateway Intents →\n" +
-        "enable “Message Content Intent”, save, then run the bot again.\n",
+      "\nKnife needs privileged intents: **Message Content** (prefix commands) and\n" +
+        "**Server Members** (knife.rip Pro/owner role sync on join).\n" +
+        "Discord Developer Portal → your app → Bot → Privileged Gateway Intents → enable both, save, retry.\n",
     );
   }
   process.exit(1);
