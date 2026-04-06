@@ -43,18 +43,29 @@ function findActionIndex(
   return null;
 }
 
+function firstArgLooksLikeUserRef(raw: string | undefined): boolean {
+  if (!raw) return false;
+  const t = raw.trim();
+  return /^<@!?\d{17,20}>$/.test(t) || /^\d{17,20}$/.test(t);
+}
+
 async function resolveHandoutTarget(
   message: Message,
   userArgs: string[],
 ): Promise<User | null> {
-  if (userArgs.length > 0) {
-    return resolveTargetUser(message, userArgs);
-  }
-
   const botId = message.client.user?.id;
   const mentions = [...message.mentions.users.values()].filter(
     (u) => u.id !== botId,
   );
+
+  if (userArgs.length > 0) {
+    // Broken/garbled tokens after ".handout" (e.g. Discord glitches) — still use @mentions.
+    if (mentions.length >= 1 && !firstArgLooksLikeUserRef(userArgs[0])) {
+      return mentions[0]!;
+    }
+    return resolveTargetUser(message, userArgs);
+  }
+
   if (mentions.length === 1) {
     return mentions[0]!;
   }

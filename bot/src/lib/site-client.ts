@@ -1,5 +1,69 @@
 import { getBotInternalSecret, getSiteApiBase } from "../config";
 
+function isUnreachableSiteError(err: unknown): boolean {
+  if (!(err instanceof Error)) return false;
+  if (/fetch failed/i.test(err.message)) return true;
+  const c = err.cause;
+  if (c instanceof Error) {
+    if (/ECONNREFUSED|ENOTFOUND|ETIMEDOUT|ECONNRESET/i.test(c.message))
+      return true;
+  }
+  if (
+    c &&
+    typeof c === "object" &&
+    "code" in c &&
+    typeof (c as { code: unknown }).code === "string"
+  ) {
+    const code = (c as { code: string }).code;
+    if (
+      code === "ECONNREFUSED" ||
+      code === "ENOTFOUND" ||
+      code === "ETIMEDOUT"
+    ) {
+      return true;
+    }
+  }
+  const cause = err.cause;
+  if (typeof AggregateError !== "undefined" && cause instanceof AggregateError) {
+    if (
+      cause.errors?.some(
+        (x) =>
+          x &&
+          typeof x === "object" &&
+          "code" in x &&
+          (x as NodeJS.ErrnoException).code === "ECONNREFUSED",
+      )
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function siteUnreachableMessage(): string {
+  const base = getSiteApiBase();
+  return (
+    `The bot could not reach **${base}** (connection failed — often **localhost** with no site running).\n\n` +
+    `**Fix:** In the bot’s \`.env\` set **SITE_API_BASE_URL** to your **live** site (e.g. \`https://knife.rip\`) — same URL as production. ` +
+    `**BOT_INTERNAL_SECRET** must match the site. **.handout** calls the Next.js API; it won’t work until the site is reachable.`
+  );
+}
+
+/** Wraps fetch so ECONNREFUSED / “fetch failed” becomes a clear setup hint. */
+async function siteFetch(
+  url: string | URL,
+  init?: RequestInit,
+): Promise<Response> {
+  try {
+    return await fetch(url, init);
+  } catch (e) {
+    if (isUnreachableSiteError(e)) {
+      throw new Error(siteUnreachableMessage());
+    }
+    throw e;
+  }
+}
+
 export type EntitlementResponse = {
   premium: boolean;
   owner: boolean;
@@ -43,7 +107,7 @@ export async function fetchEntitlementFromSite(
   const url = new URL("/api/internal/entitlement", `${base}/`);
   url.searchParams.set("discord_user_id", discordUserId);
 
-  const res = await fetch(url, {
+  const res = await siteFetch(url, {
     headers: { Authorization: `Bearer ${secret}` },
   });
 
@@ -104,7 +168,7 @@ export async function postHandoutToSite(body: {
 
   const base = getSiteApiBase();
   const url = new URL("/api/internal/handout", `${base}/`);
-  const res = await fetch(url, {
+  const res = await siteFetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -146,7 +210,7 @@ export async function postCommandRegistry(payload: object): Promise<void> {
 
   const base = getSiteApiBase();
   const url = new URL("/api/internal/commands", `${base}/`);
-  const res = await fetch(url, {
+  const res = await siteFetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
