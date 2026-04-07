@@ -4,4 +4,5 @@ export {
   buildCommandMap,
   commandDefinitions,
   syncRegistryToSite,
+  warnOnDuplicateCommandTriggers,
 } from "./registry";

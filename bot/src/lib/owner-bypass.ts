@@ -4,9 +4,12 @@ import { fetchEntitlementFromSite } from "./site-client";
 
 /**
  * **Developers** and **owners**: skip Discord **Administrator** + **Knife Pro** gates (e.g. `.say`),
- * and prefix cooldown — same effective bypass. Developers are checked first (no site call).
+ * prefix cooldown, and **`.command` disable rules** (dispatch still runs for support).
  *
- * Owners: resolved only via the site entitlement API (static list, DB handouts, and bootstrap revocations).
+ * Does **not** bypass **Manage Server** / **Manage Nicknames** for **`.prefix`**, **`.command`**,
+ * **`.audit`**, or **`.nickname`** — those require normal guild permissions in that server.
+ *
+ * Owners: via site entitlement API (handouts, bootstrap revocations).
  */
 export async function isCommandOwnerBypass(
   userId: string,

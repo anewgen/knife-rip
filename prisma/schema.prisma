@@ -87,6 +87,70 @@ model BotCommandSnapshot {
   updatedAt DateTime @updatedAt
 }
 
+/// Guilds where the bot is turned off (`.access no` — bot owner only). Absence = allowed.
+model BotGuildDenylist {
+  guildId          String   @id
+  setByDiscordId   String?
+  createdAt        DateTime @default(now())
+}
+
+/// Per-guild bot settings (e.g. custom prefix). Absence = defaults.
+model BotGuildSettings {
+  guildId         String   @id
+  commandPrefix   String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+/// `.command disable` — command blocked for everyone in scope (unless ALLOW override).
+model BotGuildCommandDisable {
+  id           String   @id @default(cuid())
+  guildId      String
+  commandKey   String
+  /// `"*"` = all channels; else channel snowflake (see thread → parent channel).
+  channelScope String
+  createdAt    DateTime @default(now())
+
+  @@unique([guildId, commandKey, channelScope])
+  @@index([guildId])
+}
+
+enum BotCommandRoleOverrideEffect {
+  /// Role may use the command even when disabled for the scope.
+  ALLOW
+  /// Role may not use the command in the scope even when not globally disabled.
+  DENY
+}
+
+/// `.command override` — per-role ALLOW (bypass disable) or DENY (block).
+model BotGuildCommandRoleOverride {
+  id           String                       @id @default(cuid())
+  guildId      String
+  commandKey   String
+  roleId       String
+  channelScope String
+  effect       BotCommandRoleOverrideEffect
+  createdAt    DateTime                     @default(now())
+  updatedAt    DateTime                     @updatedAt
+
+  @@unique([guildId, commandKey, roleId, channelScope])
+  @@index([guildId])
+}
+
+/// Prefix commands actually run in a guild (metadata only — no message body or args).
+model BotGuildCommandAudit {
+  id          String   @id @default(cuid())
+  guildId     String
+  actorUserId String
+  commandKey  String
+  /// false = handler threw before completing; true = finished without throwing.
+  success     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@index([guildId, createdAt])
+  @@index([createdAt])
+}
+
 /// Runtime handouts (`.handout`) — merged with static IDs in `lib/bot-owners.ts` / `lib/knife-premium.ts`.
 enum DiscordPrivilegeKind {
   OWNER

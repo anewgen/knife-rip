@@ -18,6 +18,7 @@ const pages = [
   { href: "/docs/getting-started", title: "Getting started" },
   { href: "/docs/permissions", title: "Permissions" },
   { href: "/docs/billing", title: "Billing & premium" },
+  { href: "/changelog", title: "What's new (changelog)" },
 ] as const;
 
 const communityHubInvite = resolveCommunityDiscordInviteUrl();

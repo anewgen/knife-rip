@@ -3,22 +3,44 @@ import { postCommandRegistry } from "../lib/site-client";
 import { afkCommand } from "./general/afk";
 import { avatarCommand } from "./general/avatar";
 import { bannerCommand } from "./general/banner";
+import { billingCommand } from "./general/billing";
+import { botinfoCommand } from "./general/botinfo";
 import { coinflipCommand } from "./general/coinflip";
+import { creditsCommand } from "./general/credits";
+import { dashboardCommand } from "./general/dashboard";
+import { eightBallCommand } from "./general/eightball";
 import { emojiCommand } from "./general/emoji";
 import { helpCommand } from "./general/help";
+import { inviteCommand } from "./general/invite";
 import { knifeCommand } from "./general/knife";
+import { nicknameCommand } from "./general/nickname";
+import { newsCommand } from "./general/news";
 import { pingCommand } from "./general/ping";
+import { pollCommand } from "./general/poll";
 import { premiumCommand } from "./general/premium";
+import { prefixCommand } from "./general/prefix";
+import { remindCommand } from "./general/remind";
 import { robloxCommand } from "./general/roblox";
 import { roleinfoCommand } from "./general/roleinfo";
 import { serverinfoCommand } from "./general/serverinfo";
+import { statusCommand } from "./general/status";
+import { esnipeCommand, rsnipeCommand, snipeCommand } from "./general/snipe";
 import { tiktokCommand } from "./general/tiktok";
 import { ttsCommand } from "./general/tts";
 import { uptimeCommand } from "./general/uptime";
 import { userinfoCommand } from "./general/userinfo";
 import { voicemasterCommand } from "./general/voicemaster";
+import { accessCommand } from "./moderation/access";
+import { auditCommand } from "./moderation/audit";
+import { banCommand } from "./moderation/ban";
+import { commandConfigCommand } from "./moderation/command-config";
 import { handoutCommand } from "./moderation/handout";
+import { kickCommand } from "./moderation/kick";
+import { lockCommand, unlockCommand } from "./moderation/lock";
+import { purgeCommand } from "./moderation/purge";
+import { slowmodeCommand } from "./moderation/slowmode";
 import { sayCommand } from "./moderation/say";
+import { timeoutCommand, untimeoutCommand } from "./moderation/timeout";
 import type { CommandCategoryShape } from "./site-payload";
 import type { KnifeCommand } from "./types";
 
@@ -27,22 +49,48 @@ import type { KnifeCommand } from "./types";
  * Add new modules under ./general, ./moderation, etc., then import here.
  */
 export const commandDefinitions: KnifeCommand[] = [
+  accessCommand,
+  auditCommand,
   afkCommand,
   avatarCommand,
   bannerCommand,
+  billingCommand,
+  botinfoCommand,
+  eightBallCommand,
+  banCommand,
   coinflipCommand,
+  commandConfigCommand,
+  creditsCommand,
+  dashboardCommand,
   emojiCommand,
   handoutCommand,
   helpCommand,
+  inviteCommand,
+  kickCommand,
   knifeCommand,
+  lockCommand,
+  nicknameCommand,
+  newsCommand,
   pingCommand,
+  pollCommand,
   premiumCommand,
+  prefixCommand,
+  remindCommand,
+  purgeCommand,
   robloxCommand,
   roleinfoCommand,
+  rsnipeCommand,
   sayCommand,
   serverinfoCommand,
+  snipeCommand,
+  statusCommand,
+  esnipeCommand,
+  slowmodeCommand,
+  timeoutCommand,
   tiktokCommand,
   ttsCommand,
+  untimeoutCommand,
+  unlockCommand,
   uptimeCommand,
   userinfoCommand,
   voicemasterCommand,
@@ -62,6 +110,41 @@ export function buildCommandMap(
     }
   }
   return map;
+}
+
+/** Primary `KnifeCommand.name` for an invocation token (name or alias), lowercase. */
+export function resolveCanonicalCommandName(
+  invoked: string,
+  map: Map<string, KnifeCommand>,
+): string | null {
+  const cmd = map.get(invoked.toLowerCase());
+  return cmd ? cmd.name.toLowerCase() : null;
+}
+
+/**
+ * Warn if two commands share the same trigger (name or alias); later defs win in `buildCommandMap`.
+ */
+export function warnOnDuplicateCommandTriggers(
+  list: KnifeCommand[] = commandDefinitions,
+): void {
+  const claimedBy = new Map<string, string>();
+  const sorted = [...list].sort((a, b) => a.name.localeCompare(b.name));
+  for (const cmd of sorted) {
+    const keys = [
+      cmd.name,
+      ...(cmd.aliases?.map((a) => a.toLowerCase()) ?? []),
+    ];
+    for (const raw of keys) {
+      const k = raw.toLowerCase();
+      const prev = claimedBy.get(k);
+      if (prev && prev !== cmd.name) {
+        console.warn(
+          `[commands] Duplicate trigger "${k}" — "${prev}" and "${cmd.name}" (map keeps "${cmd.name}"). Remove or rename an alias.`,
+        );
+      }
+      claimedBy.set(k, cmd.name);
+    }
+  }
 }
 
 function buildSiteCategories(

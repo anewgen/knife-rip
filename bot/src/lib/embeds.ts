@@ -1,5 +1,12 @@
 import { EmbedBuilder } from "discord.js";
 
+/** On-site permission guide — matches site `/docs/permissions`. */
+export const DOCS_PERMISSIONS_URL = `${(
+  process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "") ||
+  process.env.PUBLIC_SITE_ORIGIN?.trim().replace(/\/$/, "") ||
+  "https://knife.rip"
+)}/docs/permissions`;
+
 /** Neutral embeds — no strong brand colors. */
 export function minimalEmbed(params: {
   title: string;
@@ -29,9 +36,43 @@ export function minimalEmbed(params: {
   return b;
 }
 
-export function errorEmbed(description: string): EmbedBuilder {
+export function errorEmbed(
+  description: string,
+  options?: { title?: string },
+): EmbedBuilder {
   return new EmbedBuilder()
-    .setTitle("Something went wrong")
+    .setTitle(options?.title ?? "Something went wrong")
     .setDescription(description)
     .setColor(0xed4245);
+}
+
+/** Short, actionable copy with optional link to the permissions doc. */
+export function actionableErrorEmbed(params: {
+  body: string;
+  title?: string;
+  linkPermissionsDoc?: boolean;
+}): EmbedBuilder {
+  let description = params.body.trim();
+  if (params.linkPermissionsDoc) {
+    description += `\n\n[Permission guide](${DOCS_PERMISSIONS_URL})`;
+  }
+  return new EmbedBuilder()
+    .setTitle(params.title ?? "Can't do that")
+    .setDescription(description)
+    .setColor(0xed4245);
+}
+
+export function missingPermissionEmbed(
+  subject: "you" | "bot",
+  permissionLabel: string,
+): EmbedBuilder {
+  const body =
+    subject === "you"
+      ? `**Missing:** ${permissionLabel}\nGive this permission to your role in this channel or server.`
+      : `**I need:** ${permissionLabel}\nRaise Knife's role if Discord is blocking the action.`;
+  return actionableErrorEmbed({
+    body,
+    title: subject === "you" ? "Permission needed" : "Bot permission needed",
+    linkPermissionsDoc: true,
+  });
 }

@@ -10,6 +10,10 @@ import {
   isRegularOwnerResolved,
 } from "@/lib/discord-privilege";
 import { hasPremiumAccessWithDiscordAccount } from "@/lib/premium";
+import {
+  formatUtcMonthLabel,
+  getGuildCommandUsageThisMonth,
+} from "@/lib/command-usage-insights";
 import { guildNameInitial } from "@/lib/guild-name-initial";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -68,6 +72,9 @@ export default async function GuildDashboardPage({ params }: PageProps) {
     discordId != null && isDeveloperDiscordId(discordId);
   const isRegularOwner =
     discordId != null && (await isRegularOwnerResolved(discordId));
+
+  const usageBreakdown = await getGuildCommandUsageThisMonth(guild.id, 12);
+  const usageMonthLabel = formatUtcMonthLabel();
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-4 py-10 sm:px-6 sm:py-12">
@@ -138,13 +145,71 @@ export default async function GuildDashboardPage({ params }: PageProps) {
       <ScrollReveal as="div" className="grid gap-4 sm:grid-cols-2" delay={0.05} amount={0.1}>
         <Card padding="md" elevated className="sm:col-span-2">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">
-            Overview
+            Command usage (private)
           </h2>
-          <p className="mt-3 text-sm leading-relaxed text-muted">
-            Server-specific settings and analytics can plug in here (prefix,
-            modules, logs). The bot and this site share your database when you
-            wire them together.
+          <p className="mt-2 text-sm leading-relaxed text-muted">
+            Prefix commands recorded in{" "}
+            <span className="text-foreground/90">{usageMonthLabel}</span> (UTC).
+            This breakdown is only visible on this dashboard — not on public
+            pages.
           </p>
+          {usageBreakdown === null ? (
+            <p className="mt-3 text-sm text-muted">
+              Usage stats are unavailable (database not configured or error).
+            </p>
+          ) : usageBreakdown.totalAttempts === 0 ? (
+            <p className="mt-3 text-sm text-muted">
+              No commands logged for this server this month yet. Knife records a
+              short audit row when someone runs a prefix command (no message
+              text stored).
+            </p>
+          ) : (
+            <>
+              <p className="mt-3 text-sm text-foreground/90">
+                <span className="font-medium">Successful runs:</span>{" "}
+                <span className="tabular-nums">
+                  {usageBreakdown.successes.toLocaleString()}
+                </span>
+                <span className="text-muted"> · </span>
+                <span className="font-medium">Failed runs:</span>{" "}
+                <span className="tabular-nums">
+                  {usageBreakdown.failures.toLocaleString()}
+                </span>
+                {usageBreakdown.failureRatePercent != null ? (
+                  <>
+                    <span className="text-muted"> · </span>
+                    <span className="font-medium">Error rate:</span>{" "}
+                    <span className="tabular-nums">
+                      {usageBreakdown.failureRatePercent}%
+                    </span>
+                  </>
+                ) : null}
+              </p>
+              <h3 className="mt-4 text-xs font-semibold uppercase tracking-wider text-muted">
+                Top commands (successful only)
+              </h3>
+              {usageBreakdown.top.length === 0 ? (
+                <p className="mt-2 text-sm text-muted">
+                  No successful commands in this window — check error rate
+                  above if invocations are failing.
+                </p>
+              ) : (
+                <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-sm text-edge">
+                  {usageBreakdown.top.map((row) => (
+                    <li key={row.commandKey}>
+                      <span className="font-medium text-foreground/90">
+                        .{row.commandKey}
+                      </span>
+                      <span className="text-muted"> — </span>
+                      <span className="tabular-nums text-muted">
+                        {row.count.toLocaleString()}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </>
+          )}
         </Card>
         <Card padding="md">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">

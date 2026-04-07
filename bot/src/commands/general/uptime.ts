@@ -17,12 +17,13 @@ function formatUptime(seconds: number): string {
 
 export const uptimeCommand: KnifeCommand = {
   name: "uptime",
+  aliases: ["up"],
   description: "How long the bot process has been running",
   site: {
     categoryId: "utility",
     categoryTitle: "Utility",
     categoryDescription: "Quick tools and light fun.",
-    usage: ".uptime",
+    usage: ".uptime · .up",
     tier: "free",
     style: "prefix",
   },

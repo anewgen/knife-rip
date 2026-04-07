@@ -19,7 +19,7 @@ loadEnvFiles();
 export const PREFIX = "." as const;
 
 /** Must match site `lib/commands.ts` → `COMMAND_CATALOG_VERSION`. */
-export const COMMAND_CATALOG_VERSION = 4 as const;
+export const COMMAND_CATALOG_VERSION = 22 as const;
 
 export function getDiscordToken(): string {
   const token = process.env.DISCORD_BOT_TOKEN?.trim();
@@ -39,6 +39,22 @@ export function getSiteApiBase(): string {
     process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
     "http://localhost:3000";
   return raw.replace(/\/$/, "");
+}
+
+/**
+ * OAuth2 URL to add the bot to a guild. Prefer a pre-made invite from env.
+ * Uses DISCORD_CLIENT_ID when the public invite URL is unset.
+ */
+export function getBotInviteUrl(): string | undefined {
+  const preset =
+    process.env.NEXT_PUBLIC_DISCORD_INVITE_URL?.trim() ||
+    process.env.DISCORD_BOT_INVITE_URL?.trim();
+  if (preset) return preset;
+  const id = process.env.DISCORD_CLIENT_ID?.trim();
+  if (!id) return undefined;
+  const permissions =
+    process.env.DISCORD_BOT_INVITE_PERMISSIONS?.trim() || "285280256";
+  return `https://discord.com/api/oauth2/authorize?client_id=${id}&permissions=${permissions}&scope=bot%20applications.commands`;
 }
 
 export function getBotInternalSecret(): string | undefined {

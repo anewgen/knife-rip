@@ -9,35 +9,49 @@ import { tryExpandGluedVoicemaster } from "./lib/voicemaster/parse-invoke";
 import { handleVoiceMasterVoiceState } from "./lib/voicemaster/voice-handler";
 import { reconcileOrphanTemps } from "./lib/voicemaster/service";
 import { getKnifeRipPrivilegeSyncEnv } from "../../lib/discord-guild-role-sync";
-import { buildCommandMap, syncRegistryToSite } from "./commands";
+import {
+  buildCommandMap,
+  syncRegistryToSite,
+  warnOnDuplicateCommandTriggers,
+} from "./commands";
 import { PREFIX, getDiscordToken } from "./config";
 import {
   handleAfkAuthorReturn,
   handleAfkMentionReplies,
 } from "./lib/afk/message-flow";
 import { allowPrefixCommand } from "./lib/command-cooldown";
-import { errorEmbed } from "./lib/embeds";
+import { actionableErrorEmbed } from "./lib/embeds";
+import { handlePollInteraction } from "./lib/poll/interaction-handler";
 import {
   reconcileKnifeRipSuspectRoles,
   syncKnifeRipRolesForDiscordUser,
 } from "./lib/privilege-role-sync";
+import { isGuildAccessBlocked } from "./lib/guild-access";
+import { recordGuildCommandAudit } from "./lib/guild-command-audit";
+import { isGuildPrefixCommandAllowed } from "./lib/guild-command-rules";
+import { getGuildCommandPrefix } from "./lib/guild-prefix";
+import { registerSnipeListeners } from "./lib/snipe/events";
 import { acquireSingleInstanceLock } from "./lib/single-instance";
 
 acquireSingleInstanceLock();
-
-const commands = buildCommandMap();
 
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMessageReactions,
     GatewayIntentBits.GuildVoiceStates,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.DirectMessages,
   ],
-  partials: [Partials.Channel],
+  partials: [Partials.Channel, Partials.Message, Partials.Reaction],
 });
+
+registerSnipeListeners(client);
+
+const commands = buildCommandMap();
+warnOnDuplicateCommandTriggers();
 
 const PRIVILEGE_RECONCILE_MS = 20 * 60 * 1000;
 
@@ -77,6 +91,17 @@ client.once(Events.ClientReady, async (c) => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
+  if (
+    interaction.guildId &&
+    (await isGuildAccessBlocked(interaction.guildId))
+  ) {
+    return;
+  }
+  try {
+    await handlePollInteraction(interaction);
+  } catch (err) {
+    console.warn("Poll interaction:", err);
+  }
   try {
     await handleVoiceMasterInteraction(interaction);
   } catch (err) {
@@ -85,26 +110,41 @@ client.on(Events.InteractionCreate, async (interaction) => {
 });
 
 client.on(Events.VoiceStateUpdate, (oldS, newS) => {
-  void handleVoiceMasterVoiceState(client, oldS, newS);
+  void (async () => {
+    const gid = newS.guild?.id ?? oldS.guild?.id;
+    if (gid && (await isGuildAccessBlocked(gid))) return;
+    await handleVoiceMasterVoiceState(client, oldS, newS);
+  })();
 });
 
 client.on(Events.GuildMemberAdd, (member) => {
-  const env = getKnifeRipPrivilegeSyncEnv();
-  if (env && member.guild.id === env.guildId) {
-    void syncKnifeRipRolesForDiscordUser(member.id);
-  }
+  void (async () => {
+    if (await isGuildAccessBlocked(member.guild.id)) return;
+    const env = getKnifeRipPrivilegeSyncEnv();
+    if (env && member.guild.id === env.guildId) {
+      void syncKnifeRipRolesForDiscordUser(member.id);
+    }
+  })();
 });
 
 client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return;
 
+  if (
+    message.guildId &&
+    (await isGuildAccessBlocked(message.guildId))
+  ) {
+    return;
+  }
+
   await handleAfkAuthorReturn(message);
   await handleAfkMentionReplies(message);
 
   const content = message.content;
-  if (!content.startsWith(PREFIX)) return;
+  const effectivePrefix = await getGuildCommandPrefix(message.guildId);
+  if (!content.startsWith(effectivePrefix)) return;
 
-  const without = content.slice(PREFIX.length).trim();
+  const without = content.slice(effectivePrefix.length).trim();
   if (!without) return;
 
   const glued = tryExpandGluedVoicemaster(without);
@@ -117,19 +157,62 @@ client.on(Events.MessageCreate, async (message) => {
 
   if (!(await allowPrefixCommand(message))) return;
 
+  const canonicalKey = command.name.toLowerCase();
+  if (
+    message.guild &&
+    !(await isGuildPrefixCommandAllowed(message, canonicalKey))
+  ) {
+    await message
+      .reply({
+        embeds: [
+          actionableErrorEmbed({
+            title: "Command blocked",
+            body: "That command is turned off here (server **command** rules). Ask staff if this is a mistake.",
+            linkPermissionsDoc: false,
+          }),
+        ],
+      })
+      .catch(() => {});
+    return;
+  }
+
   try {
     await command.run({
       message,
       args: argParts,
     });
+    if (message.guild) {
+      recordGuildCommandAudit({
+        guildId: message.guild.id,
+        actorUserId: message.author.id,
+        commandKey: canonicalKey,
+        success: true,
+      });
+    }
   } catch (err) {
     console.error(`Command ${commandName}:`, err);
+    if (message.guild) {
+      recordGuildCommandAudit({
+        guildId: message.guild.id,
+        actorUserId: message.author.id,
+        commandKey: canonicalKey,
+        success: false,
+      });
+    }
     const description =
-      "Something went wrong running that command. Try again in a moment.";
+      "The command hit an error on our side. Try again in a moment — nothing was saved from your message.";
     const ch = message.channel;
     if (ch.isTextBased()) {
       await ch
-        .send({ embeds: [errorEmbed(description)] })
+        .send({
+          embeds: [
+            actionableErrorEmbed({
+              title: "Command error",
+              body: description,
+              linkPermissionsDoc: false,
+            }),
+          ],
+        })
         .catch(() => {});
     }
   }
@@ -141,9 +224,8 @@ client.login(token).catch((e: unknown) => {
   const msg = e instanceof Error ? e.message : String(e);
   if (msg.includes("disallowed intents")) {
     console.error(
-      "\nKnife needs privileged intents: **Message Content** (prefix commands) and\n" +
-        "**Server Members** (knife.rip Pro/owner role sync on join).\n" +
-        "Discord Developer Portal → your app → Bot → Privileged Gateway Intents → enable both, save, retry.\n",
+      "\nKnife needs **Message Content** + **Server Members** (Privileged Gateway Intents), and **Guild Message Reactions** for `.rsnipe`.\n" +
+        "Discord Developer Portal → your app → Bot → enable intents, save, retry.\n",
     );
   }
   process.exit(1);

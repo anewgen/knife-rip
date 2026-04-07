@@ -1,6 +1,10 @@
 import { PageShell } from "@/components/page-shell";
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
+import {
+  formatUtcMonthLabel,
+  getPublicTopCommandsThisMonth,
+} from "@/lib/command-usage-insights";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -9,7 +13,12 @@ export const metadata: Metadata = {
   description: "knife.rip and Knife bot service status.",
 };
 
-export default function StatusPage() {
+export const revalidate = 900;
+
+export default async function StatusPage() {
+  const topCommands = await getPublicTopCommandsThisMonth(5);
+  const monthLabel = formatUtcMonthLabel();
+
   return (
     <PageShell
       title="Status"
@@ -38,6 +47,48 @@ export default function StatusPage() {
             support@knife.rip
           </a>
           .
+        </p>
+      </Card>
+
+      <Card padding="lg" elevated>
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">
+          Community insights
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-muted">
+          Anonymized **successful** command runs across Knife (UTC calendar
+          month:{" "}
+          <span className="text-foreground/90">{monthLabel}</span>). Server
+          names are never shown — command names and counts only.
+        </p>
+        {topCommands && topCommands.length > 0 ? (
+          <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm text-edge">
+            {topCommands.map((row) => (
+              <li key={row.commandKey}>
+                <span className="font-medium text-foreground/90">
+                  .{row.commandKey}
+                </span>
+                <span className="text-muted"> — </span>
+                <span className="tabular-nums text-muted">
+                  {row.count.toLocaleString()} runs
+                </span>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="mt-4 text-sm text-muted">
+            {topCommands === null
+              ? "Usage insights are temporarily unavailable."
+              : "No usage logged for this month yet — check back after the bot has been active."}
+          </p>
+        )}
+        <p className="mt-4 text-xs text-muted">
+          Same data as JSON:{" "}
+          <Link
+            href="/api/public/command-insights"
+            className="font-medium text-edge hover:underline"
+          >
+            /api/public/command-insights
+          </Link>
         </p>
       </Card>
 
