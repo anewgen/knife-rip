@@ -20,6 +20,18 @@ export type ChangelogEntry = {
 
 export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   {
+    id: "2026-04-09-v23-leaderboards",
+    catalogVersion: 23,
+    date: "2026-04-09",
+    title: "Text and voice leaderboards",
+    summary:
+      "**.lb** shows top messengers; **.vlb** shows top voice time (AFK excluded). Stats accrue while Knife is in the server.",
+    bullets: [
+      "New tables: per-guild message counts and cumulative VC seconds.",
+      "Aliases: .leaderboard, .textlb · .vcleaderboard, .voicelb",
+    ],
+  },
+  {
     id: "2026-04-05-v22-aliases-perms",
     catalogVersion: 22,
     date: "2026-04-05",

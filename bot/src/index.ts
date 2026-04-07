@@ -32,6 +32,8 @@ import { isGuildPrefixCommandAllowed } from "./lib/guild-command-rules";
 import { getGuildCommandPrefix } from "./lib/guild-prefix";
 import { registerSnipeListeners } from "./lib/snipe/events";
 import { acquireSingleInstanceLock } from "./lib/single-instance";
+import { recordGuildTextMessageForLeaderboard } from "./lib/guild-leaderboards/text-increment";
+import { handleGuildVoiceLeaderboardState } from "./lib/guild-leaderboards/voice-track";
 
 acquireSingleInstanceLock();
 
@@ -113,6 +115,7 @@ client.on(Events.VoiceStateUpdate, (oldS, newS) => {
   void (async () => {
     const gid = newS.guild?.id ?? oldS.guild?.id;
     if (gid && (await isGuildAccessBlocked(gid))) return;
+    handleGuildVoiceLeaderboardState(oldS, newS);
     await handleVoiceMasterVoiceState(client, oldS, newS);
   })();
 });
@@ -136,6 +139,8 @@ client.on(Events.MessageCreate, async (message) => {
   ) {
     return;
   }
+
+  recordGuildTextMessageForLeaderboard(message);
 
   await handleAfkAuthorReturn(message);
   await handleAfkMentionReplies(message);

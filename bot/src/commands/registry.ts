@@ -13,6 +13,7 @@ import { emojiCommand } from "./general/emoji";
 import { helpCommand } from "./general/help";
 import { inviteCommand } from "./general/invite";
 import { knifeCommand } from "./general/knife";
+import { lbCommand, vlbCommand } from "./general/leaderboards";
 import { nicknameCommand } from "./general/nickname";
 import { newsCommand } from "./general/news";
 import { pingCommand } from "./general/ping";
@@ -68,6 +69,7 @@ export const commandDefinitions: KnifeCommand[] = [
   inviteCommand,
   kickCommand,
   knifeCommand,
+  lbCommand,
   lockCommand,
   nicknameCommand,
   newsCommand,
@@ -93,6 +95,7 @@ export const commandDefinitions: KnifeCommand[] = [
   unlockCommand,
   uptimeCommand,
   userinfoCommand,
+  vlbCommand,
   voicemasterCommand,
 ].sort((a, b) => a.name.localeCompare(b.name));
 

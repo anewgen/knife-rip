@@ -137,6 +137,28 @@ model BotGuildCommandRoleOverride {
   @@index([guildId])
 }
 
+/// Per-member text activity — human messages in guild text channels (best-effort increment).
+model BotGuildMemberTextStats {
+  guildId      String
+  userId       String
+  messageCount Int      @default(0)
+  updatedAt    DateTime @updatedAt
+
+  @@id([guildId, userId])
+  @@index([guildId, messageCount(sort: Desc)])
+}
+
+/// Per-member cumulative time in voice (seconds); excludes AFK channel; in-memory sessions lost on restart.
+model BotGuildMemberVoiceStats {
+  guildId      String
+  userId       String
+  voiceSeconds BigInt   @default(0)
+  updatedAt    DateTime @updatedAt
+
+  @@id([guildId, userId])
+  @@index([guildId, voiceSeconds(sort: Desc)])
+}
+
 /// Prefix commands actually run in a guild (metadata only — no message body or args).
 model BotGuildCommandAudit {
   id          String   @id @default(cuid())

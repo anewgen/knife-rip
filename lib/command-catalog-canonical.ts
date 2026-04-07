@@ -235,6 +235,18 @@ const CANONICAL_UNSORTED: CanonicalCommandSiteRow[] = [
     categoryDescription: "Essential prefix commands.",
   },
   {
+    name: "lb",
+    description:
+      "Text leaderboard — top members by messages sent (tracked while Knife is in the server)",
+    usage: ".lb · .leaderboard · .textlb",
+    tier: "free",
+    style: "prefix",
+    aliases: ["leaderboard", "textleaderboard", "textlb"],
+    categoryId: "utility",
+    categoryTitle: "Utility",
+    categoryDescription: "Quick tools and light fun.",
+  },
+  {
     name: "nickname",
     description:
       "Change Knife's nickname in this server (empty text clears it). Needs Manage Nicknames + bot role with Change Nickname — no owner bypass.",
@@ -503,6 +515,18 @@ const CANONICAL_UNSORTED: CanonicalCommandSiteRow[] = [
     tier: "free",
     style: "prefix",
     aliases: ["ui"],
+    categoryId: "utility",
+    categoryTitle: "Utility",
+    categoryDescription: "Quick tools and light fun.",
+  },
+  {
+    name: "vlb",
+    description:
+      "Voice leaderboard — top members by time in VC (AFK excluded; tracked while Knife is online)",
+    usage: ".vlb · .vcleaderboard · .voicelb",
+    tier: "free",
+    style: "prefix",
+    aliases: ["vcleaderboard", "voiceleaderboard", "voicelb"],
     categoryId: "utility",
     categoryTitle: "Utility",
     categoryDescription: "Quick tools and light fun.",
