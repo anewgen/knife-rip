@@ -22,6 +22,7 @@ import {
   dropByToken,
   pickRandomMember,
 } from "./drop-state";
+import { ecoM } from "./custom-emojis";
 import { runHouseGame, type HouseGameKind } from "./games";
 import { buildGambleHubPayload } from "./hub-ui";
 import { resolveHubGuild } from "./hub-guild";
@@ -59,7 +60,7 @@ async function denyNotYours(interaction: Interaction): Promise<void> {
   await interaction.reply({
     ephemeral: true,
     content:
-      "🔒 **This menu belongs to someone else.** Run **`.gamble`** to open your own.",
+      `${ecoM.gridiconslock} **This menu belongs to someone else.** Run **\`.gamble\`** to open your own.`,
   });
 }
 
@@ -143,10 +144,10 @@ async function handleEconomyButton(interaction: ButtonInteraction): Promise<void
         .setCustomId(`${ECON_INTERACTION_PREFIX}${uid}:m:${gKey}`)
         .setTitle(
           kind === "coinflip"
-            ? "🪙 Coinflip"
+            ? `${ecoM.coinflip} Coinflip`
             : kind === "dice"
-              ? "🎲 Dice"
-              : "🎰 Slots",
+              ? `${ecoM.dice} Dice`
+              : `${ecoM.slots} Slots`,
         );
       const input = new TextInputBuilder()
         .setCustomId("amount")
@@ -175,14 +176,14 @@ async function handleEconomyButton(interaction: ButtonInteraction): Promise<void
           embeds: [
             new EmbedBuilder()
               .setColor(0x57f287)
-              .setTitle("📋 Your stats")
+              .setTitle(`${ecoM.stats} Your stats`)
               .setDescription(
-                `💵 **Cash:** **${formatCash(u.cash)}**\n` +
-                  `📨 **Messages (tracked):** **${u.lifetimeMessages.toLocaleString()}**\n` +
-                  `🏅 **Rank:** **#${rank}** by cash\n` +
-                  `🎯 **W / L:** **${u.gambleWins}** / **${u.gambleLosses}**\n` +
-                  `📈 **Net (games):** **${formatCash(u.gambleNetProfit)}**\n` +
-                  `🔥 **Win streak:** **${u.gambleWinStreak}** (best **${u.gambleBestStreak}**)`,
+                `${ecoM.cash} **Cash:** **${formatCash(u.cash)}**\n` +
+                  `${ecoM.msgs} **Messages (tracked):** **${u.lifetimeMessages.toLocaleString()}**\n` +
+                  `${ecoM.toplb} **Rank:** **#${rank}** by cash\n` +
+                  `${ecoM.slots} **W / L:** **${u.gambleWins}** / **${u.gambleLosses}**\n` +
+                  `${ecoM.rich} **Net (games):** **${formatCash(u.gambleNetProfit)}**\n` +
+                  `${ecoM.booster} **Win streak:** **${u.gambleWinStreak}** (best **${u.gambleBestStreak}**)`,
               ),
           ],
         });
@@ -207,7 +208,7 @@ async function handleEconomyButton(interaction: ButtonInteraction): Promise<void
           embeds: [
             new EmbedBuilder()
               .setColor(0xf0b232)
-              .setTitle("🏆 Richest")
+              .setTitle(`${ecoM.toplb} Richest`)
               .setDescription(
                 lines.length > 0
                   ? lines.join("\n")
@@ -236,7 +237,7 @@ async function handleEconomyButton(interaction: ButtonInteraction): Promise<void
           embeds: [
             new EmbedBuilder()
               .setColor(0x5865f2)
-              .setTitle("🎯 Top gamblers (net profit)")
+              .setTitle(`${ecoM.slots} Top gamblers (net profit)`)
               .setDescription(
                 lines.length > 0
                   ? lines.join("\n")
@@ -252,7 +253,7 @@ async function handleEconomyButton(interaction: ButtonInteraction): Promise<void
     if (tok[2] === "pay" && tok[3] === "open") {
       const modal = new ModalBuilder()
         .setCustomId(`${ECON_INTERACTION_PREFIX}${uid}:m:pay`)
-        .setTitle("💸 Send cash");
+        .setTitle(`${ecoM.pay} Send cash`);
       const target = new TextInputBuilder()
         .setCustomId("target")
         .setLabel("Recipient user ID")
@@ -361,7 +362,7 @@ async function handleEconomySelect(
     void sendEconomyLog(
       interaction.client,
       economyLogEmbed(
-        "🛒 Shop purchase",
+        `${ecoM.shop} Shop purchase`,
         `<@${uid}> bought **${item.name}** for **${formatCash(price)}**.`,
       ),
     );
@@ -430,7 +431,7 @@ async function handleEconomyModal(
       void sendEconomyLog(
         interaction.client,
         economyLogEmbed(
-          "💸 Transfer",
+          `${ecoM.pay} Transfer`,
           `<@${uid}> → <@${targetRaw}> **${formatCash(amount)}** (tax **${formatCash(tax)}**).`,
         ),
       );
@@ -510,7 +511,7 @@ async function handleDropButton(interaction: ButtonInteraction): Promise<void> {
   if (interaction.user.id !== session.ownerId) {
     await interaction.reply({
       ephemeral: true,
-      content: "🔒 Only the staff member who started this drop can use these buttons.",
+      content: `${ecoM.gridiconslock} Only the staff member who started this drop can use these buttons.`,
     });
     return;
   }
@@ -531,7 +532,7 @@ async function handleDropButton(interaction: ButtonInteraction): Promise<void> {
       embeds: [
         new EmbedBuilder()
           .setColor(0xed4245)
-          .setTitle("❌ Lucky drop cancelled")
+          .setTitle(`${ecoM.Cancel} Lucky drop cancelled`)
           .setDescription("No cash was awarded."),
       ],
       components: [],
@@ -573,7 +574,7 @@ async function handleDropButton(interaction: ButtonInteraction): Promise<void> {
         embeds: [
           new EmbedBuilder()
             .setColor(0x57f287)
-            .setTitle("✅ Lucky drop complete")
+            .setTitle(`${ecoM.Confirm} Lucky drop complete`)
             .setDescription(
               `<@${session.selectedUserId}> received **${formatCash(session.amount)}** cash!`,
             ),
@@ -583,7 +584,7 @@ async function handleDropButton(interaction: ButtonInteraction): Promise<void> {
       void sendEconomyLog(
         interaction.client,
         economyLogEmbed(
-          "🎁 Lucky drop",
+          `${ecoM.luckydrop} Lucky drop`,
           `<@${session.ownerId}> awarded **${formatCash(session.amount)}** → <@${session.selectedUserId}>.`,
         ),
       );
@@ -592,7 +593,7 @@ async function handleDropButton(interaction: ButtonInteraction): Promise<void> {
         embeds: [
           new EmbedBuilder()
             .setColor(0xed4245)
-            .setTitle("❌ Drop failed")
+            .setTitle(`${ecoM.Cancel} Drop failed`)
             .setDescription("Could not credit — try again."),
         ],
         components: [],

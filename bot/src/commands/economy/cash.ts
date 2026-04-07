@@ -1,4 +1,5 @@
 import { economyPayoutMultiplier } from "../../lib/economy/boost";
+import { ecoM } from "../../lib/economy/custom-emojis";
 import { formatCash } from "../../lib/economy/money";
 import { getCash } from "../../lib/economy/wallet";
 import { minimalEmbed } from "../../lib/embeds";
@@ -31,17 +32,17 @@ export const cashCommand: KnifeCommand = {
     const bonus = mult > 1;
     const title =
       target.id === message.author.id
-        ? "💵 Your wallet"
-        : `💵 ${target.username}`;
+        ? `${ecoM.cash} Your wallet`
+        : `${ecoM.cash} ${target.username}`;
     await message.reply({
       embeds: [
         minimalEmbed({
           title,
           description:
-            `**Balance:** **${formatCash(bal)}** cash\n` +
+            `${ecoM.cash} **Balance:** **${formatCash(bal)}** cash\n` +
             (bonus
-              ? "✨ **+20%** earnings on wins & milestones (boost / Pro / owner)."
-              : "ℹ️ Link Discord Nitro boost or **Knife Pro** for **+20%** on wins & milestones."),
+              ? `${ecoM.booster} **+20%** earnings on wins & milestones (boost / Pro / owner).`
+              : `${ecoM.tablerinfosquarefilled} Link Discord Nitro boost or **Knife Pro** for **+20%** on wins & milestones.`),
         }),
       ],
     });

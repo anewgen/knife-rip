@@ -1,6 +1,7 @@
 import type { GuildMember } from "discord.js";
 import { getBotPrisma } from "../db-prisma";
 import { economyPayoutMultiplier } from "./boost";
+import { ecoM } from "./custom-emojis";
 import { formatCash } from "./money";
 
 export type HouseGameKind = "coinflip" | "dice" | "slots";
@@ -50,34 +51,34 @@ export async function runHouseGame(params: {
       const win = Math.random() < 0.5;
       payout = win ? (bet * 2n * mc) / 100n : 0n;
       summary = win
-        ? `🪙 **Coinflip** — you **won**! Payout **${formatCash(payout)}** cash.`
-        : `🪙 **Coinflip** — you **lost** this round.`;
+        ? `${ecoM.coinflip} **Coinflip** — you **won**! Payout **${formatCash(payout)}** cash.`
+        : `${ecoM.coinflip} **Coinflip** — you **lost** this round.`;
     } else if (game === "dice") {
       const you = 1 + Math.floor(Math.random() * 6);
       const house = 1 + Math.floor(Math.random() * 6);
       if (you > house) {
         payout = (bet * 2n * mc) / 100n;
-        summary = `🎲 You **${you}** vs house **${house}** — you **win** **${formatCash(payout)}**!`;
+        summary = `${ecoM.dice} You **${you}** vs house **${house}** — you **win** **${formatCash(payout)}**!`;
       } else if (you < house) {
         payout = 0n;
-        summary = `🎲 You **${you}** vs house **${house}** — house wins.`;
+        summary = `${ecoM.dice} You **${you}** vs house **${house}** — house wins.`;
       } else {
         payout = bet;
-        summary = `🎲 Tie **${you}**–**${house}** — **push** (refunded).`;
+        summary = `${ecoM.dice} Tie **${you}**–**${house}** — **push** (refunded).`;
       }
     } else {
       const [a, b, c] = rollSlots();
       const line = `${a} │ ${b} │ ${c}`;
       if (a === b && b === c) {
         payout = (bet * 5n * mc) / 100n;
-        summary = `🎰 ${line}\n**Triple** — **${formatCash(payout)}**!`;
+        summary = `${ecoM.slots} ${line}\n**Triple** — **${formatCash(payout)}**!`;
       } else if (a === b || b === c || a === c) {
         payout = (bet * 3n * mc) / 200n;
         if (payout < 1n) payout = 1n;
-        summary = `🎰 ${line}\n**Pair** — **${formatCash(payout)}**!`;
+        summary = `${ecoM.slots} ${line}\n**Pair** — **${formatCash(payout)}**!`;
       } else {
         payout = 0n;
-        summary = `🎰 ${line}\nNo luck — try again!`;
+        summary = `${ecoM.slots} ${line}\nNo luck — try again!`;
       }
     }
 

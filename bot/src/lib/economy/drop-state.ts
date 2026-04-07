@@ -7,6 +7,7 @@ import {
   type MessageActionRowComponentBuilder,
 } from "discord.js";
 import { DROP_INTERACTION_PREFIX } from "./config";
+import { ecoBtn, ecoM } from "./custom-emojis";
 import { formatCash } from "./money";
 
 export type DropSession = {
@@ -37,11 +38,11 @@ export function buildDropEmbed(
 ): EmbedBuilder {
   return new EmbedBuilder()
     .setColor(0xf0b232)
-    .setTitle("💰 Lucky drop")
+    .setTitle(`${ecoM.luckydrop} Lucky drop`)
     .setDescription(
-      `**${formatCash(session.amount)}** cash up for grabs in **${guild.name}**!\n\n` +
-        `🎯 **Selected:** <@${session.selectedUserId}>\n\n` +
-        `Use **✅ Confirm** to pay out, **🔄 Reroll** for someone else, or **❌ Cancel**.`,
+      `${ecoM.cash} **${formatCash(session.amount)}** cash up for grabs in **${guild.name}**!\n\n` +
+        `${ecoM.stats} **Selected:** <@${session.selectedUserId}>\n\n` +
+        `Use ${ecoM.Confirm} **Confirm** to pay out, ${ecoM.Reroll} **Reroll** for someone else, or ${ecoM.Cancel} **Cancel**.`,
     );
 }
 
@@ -54,17 +55,17 @@ export function dropActionRows(
         .setCustomId(`${DROP_INTERACTION_PREFIX}${token}:confirm`)
         .setLabel("Confirm")
         .setStyle(ButtonStyle.Success)
-        .setEmoji("✅"),
+        .setEmoji(ecoBtn.Confirm),
       new ButtonBuilder()
         .setCustomId(`${DROP_INTERACTION_PREFIX}${token}:reroll`)
         .setLabel("Reroll")
         .setStyle(ButtonStyle.Secondary)
-        .setEmoji("🔄"),
+        .setEmoji(ecoBtn.Reroll),
       new ButtonBuilder()
         .setCustomId(`${DROP_INTERACTION_PREFIX}${token}:cancel`)
         .setLabel("Cancel")
         .setStyle(ButtonStyle.Danger)
-        .setEmoji("❌"),
+        .setEmoji(ecoBtn.Cancel),
     ),
   ];
 }
