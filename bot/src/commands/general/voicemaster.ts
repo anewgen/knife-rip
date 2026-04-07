@@ -11,7 +11,7 @@ export const voicemasterCommand: KnifeCommand = {
     categoryTitle: "Utility",
     categoryDescription: "Quick tools and light fun.",
     usage:
-      ".voicemaster setup · panel pages (🔒 lock · 👻 ghost · disconnect menu · ➕ limit · ✏ rename) · .vm join",
+      ".voicemaster setup · panel pages (lock · ghost · disconnect · limit · rename) · .vm join",
     tier: "free",
     style: "prefix",
   },

@@ -5,7 +5,50 @@ import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import type { BotCommand, CommandCategory } from "@/lib/commands";
+import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
+
+const USAGE_ICON_PATTERN = /\{\{([a-z0-9]+:[a-z0-9-]+)\}\}/gi;
+
+function CommandUsageDisplay({ text }: { text: string }) {
+  const matches = [...text.matchAll(USAGE_ICON_PATTERN)];
+  if (matches.length === 0) {
+    return (
+      <pre className="mt-3 overflow-x-auto rounded-lg border border-white/[0.06] bg-background/80 p-3 font-mono text-xs leading-relaxed text-accent">
+        {text}
+      </pre>
+    );
+  }
+
+  const parts: ReactNode[] = [];
+  let last = 0;
+  let i = 0;
+  for (const m of matches) {
+    const start = m.index ?? 0;
+    if (start > last) {
+      parts.push(<span key={`t-${i++}`}>{text.slice(last, start)}</span>);
+    }
+    const slug = m[1];
+    parts.push(
+      <Icon
+        key={`t-${i++}`}
+        icon={slug}
+        className="mx-0.5 inline size-[0.95rem] shrink-0 align-[-0.15em] text-edge/90"
+        aria-hidden
+      />,
+    );
+    last = start + m[0].length;
+  }
+  if (last < text.length) {
+    parts.push(<span key={`t-${i++}`}>{text.slice(last)}</span>);
+  }
+
+  return (
+    <div className="mt-3 overflow-x-auto rounded-lg border border-white/[0.06] bg-background/80 p-3 font-mono text-xs leading-relaxed text-accent">
+      <span className="inline">{parts}</span>
+    </div>
+  );
+}
 
 function invokePrefix(cmd: BotCommand): string {
   return cmd.style === "slash" ? "/" : ".";
@@ -178,9 +221,7 @@ export function CommandsCatalog({ categories }: Props) {
                         {cmd.description}
                       </p>
                       {cmd.usage ? (
-                        <pre className="mt-3 overflow-x-auto rounded-lg border border-white/[0.06] bg-background/80 p-3 font-mono text-xs leading-relaxed text-accent">
-                          {cmd.usage}
-                        </pre>
+                        <CommandUsageDisplay text={cmd.usage} />
                       ) : null}
                       <CommandAliasesDisclosure cmd={cmd} invoke={p} />
                     </Card>
