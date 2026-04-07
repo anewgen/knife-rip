@@ -4,6 +4,10 @@ import {
   GatewayIntentBits,
   Partials,
 } from "discord.js";
+import { handleVoiceMasterButton } from "./lib/voicemaster/interaction-handler";
+import { tryExpandGluedVoicemaster } from "./lib/voicemaster/parse-invoke";
+import { handleVoiceMasterVoiceState } from "./lib/voicemaster/voice-handler";
+import { reconcileOrphanTemps } from "./lib/voicemaster/service";
 import { getKnifeRipPrivilegeSyncEnv } from "../../lib/discord-guild-role-sync";
 import { buildCommandMap, syncRegistryToSite } from "./commands";
 import { PREFIX, getDiscordToken } from "./config";
@@ -56,6 +60,12 @@ client.once(Events.ClientReady, async (c) => {
     console.warn("Command catalog sync failed:", err);
   }
 
+  try {
+    await reconcileOrphanTemps(c);
+  } catch (e) {
+    console.warn("VoiceMaster orphan reconcile failed:", e);
+  }
+
   setInterval(() => {
     reconcileKnifeRipSuspectRoles(c).catch((err) =>
       console.warn("Privilege role reconcile failed:", err),
@@ -64,6 +74,18 @@ client.once(Events.ClientReady, async (c) => {
   reconcileKnifeRipSuspectRoles(c).catch((err) =>
     console.warn("Privilege role reconcile failed:", err),
   );
+});
+
+client.on(Events.InteractionCreate, async (interaction) => {
+  try {
+    await handleVoiceMasterButton(interaction);
+  } catch (err) {
+    console.warn("VoiceMaster interaction:", err);
+  }
+});
+
+client.on(Events.VoiceStateUpdate, (oldS, newS) => {
+  void handleVoiceMasterVoiceState(client, oldS, newS);
 });
 
 client.on(Events.GuildMemberAdd, (member) => {
@@ -85,7 +107,10 @@ client.on(Events.MessageCreate, async (message) => {
   const without = content.slice(PREFIX.length).trim();
   if (!without) return;
 
-  const [name, ...argParts] = without.split(/\s+/);
+  const glued = tryExpandGluedVoicemaster(without);
+  const [name, ...argParts] = glued
+    ? ["voicemaster", ...glued]
+    : without.split(/\s+/);
   const commandName = name.toLowerCase();
   const command = commands.get(commandName);
   if (!command) return;

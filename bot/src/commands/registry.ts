@@ -16,6 +16,7 @@ import { tiktokCommand } from "./general/tiktok";
 import { ttsCommand } from "./general/tts";
 import { uptimeCommand } from "./general/uptime";
 import { userinfoCommand } from "./general/userinfo";
+import { voicemasterCommand } from "./general/voicemaster";
 import { handoutCommand } from "./moderation/handout";
 import { sayCommand } from "./moderation/say";
 import type { CommandCategoryShape } from "./site-payload";
@@ -44,6 +45,7 @@ export const commandDefinitions: KnifeCommand[] = [
   ttsCommand,
   uptimeCommand,
   userinfoCommand,
+  voicemasterCommand,
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 export function buildCommandMap(

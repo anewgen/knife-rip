@@ -110,3 +110,40 @@ model BootstrapOwnerRevocation {
   revokedByDiscordId String?
   createdAt            DateTime @default(now())
 }
+
+/// VoiceMaster (temporary VCs) — one row per guild with hub + panel + defaults.
+model VoiceMasterGuildConfig {
+  id                  String   @id @default(cuid())
+  guildId             String   @unique
+  hubChannelId        String
+  panelChannelId      String
+  categoryId          String
+  privateCategoryId   String?
+  defaultNameTemplate String   @default("{user}'s channel")
+  defaultBitrate      Int      @default(64000)
+  /// Discord voice region id, or null for automatic
+  defaultRegion       String?
+  /// Role copied into permission overwrites for new temp channels (optional)
+  defaultRoleId       String?
+  /// Role granted when joining a temp VC, removed when leaving (optional)
+  joinRoleId          String?
+  defaultInterface    Boolean  @default(false)
+  panelMessageId      String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+/// Spawned temporary voice channel — deleted when empty.
+model VoiceMasterTempChannel {
+  id        String   @id @default(cuid())
+  channelId String   @unique
+  guildId   String
+  ownerId   String
+  /// Optional status shown in channel name (suffix) or topic-style tracking
+  statusLabel String?
+  musicOnly   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([guildId])
+  @@index([ownerId])
+}

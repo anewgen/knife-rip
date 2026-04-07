@@ -203,6 +203,19 @@ const CANONICAL_UNSORTED: CanonicalCommandSiteRow[] = [
     categoryTitle: "Utility",
     categoryDescription: "Quick tools and light fun.",
   },
+  {
+    name: "voicemaster",
+    description:
+      "VoiceMaster — join-to-create temporary voice channels with lock, ghost, permit, transfer, and server defaults",
+    usage:
+      ".voicemaster help · .voicemaster setup · .vmsetup · .vm lock · .voicemaster join",
+    tier: "free",
+    style: "prefix",
+    aliases: ["vm"],
+    categoryId: "utility",
+    categoryTitle: "Utility",
+    categoryDescription: "Quick tools and light fun.",
+  },
 ];
 
 export const CANONICAL_COMMAND_SITE_ROWS: CanonicalCommandSiteRow[] = [
