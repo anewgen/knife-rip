@@ -10,12 +10,22 @@ import { useMemo, useState } from "react";
 
 const USAGE_ICON_PATTERN = /\{\{([a-z0-9]+:[a-z0-9-]+)\}\}/gi;
 
+/** Map common usage emojis to Iconify slugs so DB/bot text still renders as icons on the site. */
+function usageEmojisToIconTokens(raw: string): string {
+  return raw
+    .replace(/🔒\uFE0F?/g, "{{mdi:lock}}")
+    .replace(/👻\uFE0F?/g, "{{mdi:ghost-outline}}")
+    .replace(/➕\uFE0F?/g, "{{mdi:plus}}")
+    .replace(/✏️|✏\uFE0F?/g, "{{mdi:pencil}}");
+}
+
 function CommandUsageDisplay({ text }: { text: string }) {
-  const matches = [...text.matchAll(USAGE_ICON_PATTERN)];
+  const normalized = usageEmojisToIconTokens(text);
+  const matches = [...normalized.matchAll(USAGE_ICON_PATTERN)];
   if (matches.length === 0) {
     return (
       <pre className="mt-3 overflow-x-auto rounded-lg border border-white/[0.06] bg-background/80 p-3 font-mono text-xs leading-relaxed text-accent">
-        {text}
+        {normalized}
       </pre>
     );
   }
@@ -26,7 +36,7 @@ function CommandUsageDisplay({ text }: { text: string }) {
   for (const m of matches) {
     const start = m.index ?? 0;
     if (start > last) {
-      parts.push(<span key={`t-${i++}`}>{text.slice(last, start)}</span>);
+      parts.push(<span key={`t-${i++}`}>{normalized.slice(last, start)}</span>);
     }
     const slug = m[1];
     parts.push(
@@ -39,8 +49,8 @@ function CommandUsageDisplay({ text }: { text: string }) {
     );
     last = start + m[0].length;
   }
-  if (last < text.length) {
-    parts.push(<span key={`t-${i++}`}>{text.slice(last)}</span>);
+  if (last < normalized.length) {
+    parts.push(<span key={`t-${i++}`}>{normalized.slice(last)}</span>);
   }
 
   return (
