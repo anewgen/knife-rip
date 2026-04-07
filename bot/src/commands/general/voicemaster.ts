@@ -5,13 +5,13 @@ export const voicemasterCommand: KnifeCommand = {
   name: "voicemaster",
   aliases: ["vm"],
   description:
-    "VoiceMaster — join-to-create temporary voice channels; lock, ghost, permit, and more",
+    "VoiceMaster — temp voice channels from a hub; panel (lock, ghost, disconnect, limits, rename) plus permit, transfer, etc.",
   site: {
     categoryId: "utility",
     categoryTitle: "Utility",
     categoryDescription: "Quick tools and light fun.",
     usage:
-      ".voicemaster help · .voicemaster setup · .vmsetup · .vm lock · .voicemaster join",
+      ".voicemaster setup · panel pages (🔒 lock · 👻 ghost · disconnect menu · ➕ limit · ✏ rename) · .vm join",
     tier: "free",
     style: "prefix",
   },

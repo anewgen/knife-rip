@@ -1,26 +1,212 @@
-import { PermissionFlagsBits, type Interaction } from "discord.js";
+import {
+  EmbedBuilder,
+  type ButtonInteraction,
+  type Interaction,
+  type ModalSubmitInteraction,
+  type UserSelectMenuInteraction,
+} from "discord.js";
 import {
   applyGhost,
   applyLock,
-  applyMusicMode,
   applyUnlock,
   applyUnghost,
-  getGuildConfig,
   getTempByChannel,
   ownerCanControl,
   ownerStillInChannel,
-  savePanelMessageId,
   transferOwnership,
 } from "./service";
-import { buildPanelPayload } from "./panel-ui";
+import {
+  buildPanelPayload,
+  buildRenameModal,
+  panelCustomId,
+  VM_FIELD_RENAME,
+  VM_MODAL_RENAME,
+} from "./panel-ui";
 
-export async function handleVoiceMasterButton(
+async function requireVoiceTemp(interaction: Interaction) {
+  if (!interaction.guild || !interaction.member) return null;
+  if (!interaction.isRepliable()) return null;
+  const member = await interaction.guild.members.fetch(interaction.user.id);
+  const voice = member.voice.channel;
+  if (!voice?.isVoiceBased()) {
+    await interaction.reply({
+      ephemeral: true,
+      content: "Join your VoiceMaster channel first.",
+    });
+    return null;
+  }
+  const temp = await getTempByChannel(voice.id);
+  if (!temp) {
+    await interaction.reply({
+      ephemeral: true,
+      content: "This isn’t a VoiceMaster temporary channel.",
+    });
+    return null;
+  }
+  return { guild: interaction.guild, member, voice, temp };
+}
+
+function voiceInfoEmbed(
+  voice: import("discord.js").VoiceBasedChannel,
+  temp: { ownerId: string },
+): EmbedBuilder {
+  const lim = voice.userLimit;
+  return new EmbedBuilder()
+    .setTitle("Channel information")
+    .setColor(0x2b2d31)
+    .addFields(
+      { name: "Name", value: voice.name.slice(0, 256), inline: true },
+      { name: "Channel ID", value: `\`${voice.id}\``, inline: true },
+      {
+        name: "Members",
+        value: String(voice.members.size),
+        inline: true,
+      },
+      {
+        name: "Bitrate",
+        value: `${voice.bitrate}`,
+        inline: true,
+      },
+      {
+        name: "User limit",
+        value: lim === 0 ? "No limit" : String(lim),
+        inline: true,
+      },
+      {
+        name: "Region",
+        value: voice.rtcRegion ?? "Automatic",
+        inline: true,
+      },
+      {
+        name: "Owner ID",
+        value: `\`${temp.ownerId}\``,
+        inline: false,
+      },
+    );
+}
+
+export function isVoiceMasterInteraction(interaction: Interaction): boolean {
+  if (interaction.isButton() || interaction.isUserSelectMenu()) {
+    return interaction.customId.startsWith("vm:");
+  }
+  if (interaction.isModalSubmit()) {
+    return interaction.customId === VM_MODAL_RENAME;
+  }
+  return false;
+}
+
+export async function handleVoiceMasterInteraction(
   interaction: Interaction,
-): Promise<boolean> {
-  if (!interaction.isButton()) return false;
-  if (!interaction.customId.startsWith("vm:")) return false;
-  if (!interaction.guild || !interaction.member) return true;
-  if (interaction.user.bot) return true;
+): Promise<void> {
+  if (!isVoiceMasterInteraction(interaction)) return;
+
+  if (interaction.isUserSelectMenu()) {
+    await handleDisconnectSelect(interaction);
+    return;
+  }
+
+  if (interaction.isModalSubmit()) {
+    await handleRenameModal(interaction);
+    return;
+  }
+
+  if (interaction.isButton()) {
+    await handleVmButton(interaction);
+  }
+}
+
+async function handleRenameModal(interaction: ModalSubmitInteraction) {
+  if (interaction.customId !== VM_MODAL_RENAME) return;
+  if (!interaction.guild) return;
+
+  const ctx = await requireVoiceTemp(interaction);
+  if (!ctx) return;
+  if (!ownerCanControl(ctx.member, ctx.temp.ownerId)) {
+    await interaction.reply({
+      ephemeral: true,
+      content: "You don’t control this channel.",
+    });
+    return;
+  }
+
+  const newName = interaction.fields
+    .getTextInputValue(VM_FIELD_RENAME)
+    .trim()
+    .slice(0, 100);
+  if (!newName) {
+    await interaction.reply({
+      ephemeral: true,
+      content: "Name can’t be empty.",
+    });
+    return;
+  }
+
+  try {
+    await ctx.voice.setName(newName);
+    await interaction.reply({
+      ephemeral: true,
+      content: `Renamed to **${newName}**.`,
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    await interaction.reply({
+      ephemeral: true,
+      content: `Couldn’t rename: ${msg.slice(0, 400)}`,
+    });
+  }
+}
+
+async function handleDisconnectSelect(interaction: UserSelectMenuInteraction) {
+  if (interaction.customId !== panelCustomId("sel", "disconnect")) return;
+  if (!interaction.guild) return;
+
+  const ctx = await requireVoiceTemp(interaction);
+  if (!ctx) return;
+  if (!ownerCanControl(ctx.member, ctx.temp.ownerId)) {
+    await interaction.reply({
+      ephemeral: true,
+      content: "You don’t control this channel.",
+    });
+    return;
+  }
+
+  const targetId = interaction.values[0];
+  if (targetId === ctx.member.id) {
+    await interaction.reply({
+      ephemeral: true,
+      content: "Pick someone else to disconnect.",
+    });
+    return;
+  }
+
+  const target = await interaction.guild.members.fetch(targetId).catch(() => null);
+  if (!target?.voice.channel || target.voice.channelId !== ctx.voice.id) {
+    await interaction.reply({
+      ephemeral: true,
+      content: "That member isn’t in this voice channel.",
+    });
+    return;
+  }
+
+  try {
+    await target.voice.disconnect("Disconnected by VoiceMaster owner");
+    await interaction.reply({
+      ephemeral: true,
+      content: `Disconnected **${target.user.tag}**.`,
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    await interaction.reply({
+      ephemeral: true,
+      content: `Couldn’t disconnect: ${msg.slice(0, 400)}`,
+    });
+  }
+}
+
+async function handleVmButton(interaction: ButtonInteraction) {
+  if (!interaction.customId.startsWith("vm:")) return;
+  if (!interaction.guild || !interaction.member) return;
+  if (interaction.user.bot) return;
 
   const member = await interaction.guild.members.fetch(interaction.user.id);
   const parts = interaction.customId.split(":");
@@ -29,7 +215,7 @@ export async function handleVoiceMasterButton(
   if (kind === "nav") {
     const page = Math.min(2, Math.max(0, Number(parts[2] ?? 0) || 0));
     await interaction.update(buildPanelPayload(page));
-    return true;
+    return;
   }
 
   if (kind !== "act") {
@@ -37,51 +223,18 @@ export async function handleVoiceMasterButton(
       ephemeral: true,
       content: "Unknown VoiceMaster control.",
     });
-    return true;
+    return;
   }
 
   const action = parts[2];
   const voice = member.voice.channel;
-
-  if (action === "iface") {
-    const cfg = await getGuildConfig(interaction.guild.id);
-    if (!cfg || !member.permissions.has(PermissionFlagsBits.Administrator)) {
-      await interaction.reply({
-        ephemeral: true,
-        content:
-          "Only a server Administrator can refresh the panel from here, or VoiceMaster isn’t set up.",
-      });
-      return true;
-    }
-    const ch = await interaction.guild.channels
-      .fetch(cfg.panelChannelId)
-      .catch(() => null);
-    if (!ch?.isTextBased()) {
-      await interaction.reply({
-        ephemeral: true,
-        content: "Panel channel is missing.",
-      });
-      return true;
-    }
-    if (cfg.panelMessageId) {
-      const old = await ch.messages.fetch(cfg.panelMessageId).catch(() => null);
-      await old?.delete().catch(() => {});
-    }
-    const msg = await ch.send(buildPanelPayload(0));
-    await savePanelMessageId(interaction.guild.id, msg.id);
-    await interaction.reply({
-      ephemeral: true,
-      content: "Posted a new panel message.",
-    });
-    return true;
-  }
 
   if (!voice?.isVoiceBased()) {
     await interaction.reply({
       ephemeral: true,
       content: "Join your VoiceMaster channel first.",
     });
-    return true;
+    return;
   }
 
   const temp = await getTempByChannel(voice.id);
@@ -90,7 +243,7 @@ export async function handleVoiceMasterButton(
       ephemeral: true,
       content: "This isn’t a VoiceMaster temporary channel.",
     });
-    return true;
+    return;
   }
 
   if (action === "claim") {
@@ -99,7 +252,7 @@ export async function handleVoiceMasterButton(
         ephemeral: true,
         content: "The owner is still in this channel.",
       });
-      return true;
+      return;
     }
     await transferOwnership(voice.id, member.id);
     await interaction.guild.channels
@@ -127,7 +280,69 @@ export async function handleVoiceMasterButton(
       ephemeral: true,
       content: "You are now the channel owner.",
     });
-    return true;
+    return;
+  }
+
+  if (action === "rename") {
+    if (!ownerCanControl(member, temp.ownerId)) {
+      await interaction.reply({
+        ephemeral: true,
+        content: "You don’t control this channel.",
+      });
+      return;
+    }
+    await interaction.showModal(buildRenameModal());
+    return;
+  }
+
+  if (action === "info") {
+    if (!ownerCanControl(member, temp.ownerId)) {
+      await interaction.reply({
+        ephemeral: true,
+        content: "You don’t control this channel.",
+      });
+      return;
+    }
+    await interaction.reply({
+      ephemeral: true,
+      embeds: [voiceInfoEmbed(voice, temp)],
+    });
+    return;
+  }
+
+  if (action === "liminc" || action === "limdec") {
+    if (!ownerCanControl(member, temp.ownerId)) {
+      await interaction.reply({
+        ephemeral: true,
+        content: "You don’t control this channel.",
+      });
+      return;
+    }
+    try {
+      let u = voice.userLimit;
+      if (action === "liminc") {
+        if (u === 0) u = 1;
+        else u = Math.min(99, u + 1);
+      } else {
+        if (u <= 1) u = 0;
+        else u -= 1;
+      }
+      await voice.setUserLimit(u);
+      await interaction.reply({
+        ephemeral: true,
+        content:
+          u === 0
+            ? "User limit cleared (no limit)."
+            : `User limit set to **${u}**.`,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      await interaction.reply({
+        ephemeral: true,
+        content: `Couldn’t update limit: ${msg.slice(0, 400)}`,
+      });
+    }
+    return;
   }
 
   if (!ownerCanControl(member, temp.ownerId)) {
@@ -135,7 +350,7 @@ export async function handleVoiceMasterButton(
       ephemeral: true,
       content: "You don’t control this channel.",
     });
-    return true;
+    return;
   }
 
   try {
@@ -152,18 +367,12 @@ export async function handleVoiceMasterButton(
       case "unghost":
         await applyUnghost(voice, temp.ownerId);
         break;
-      case "musicon":
-        await applyMusicMode(interaction.guild, voice, temp.ownerId, true);
-        break;
-      case "musicoff":
-        await applyMusicMode(interaction.guild, voice, temp.ownerId, false);
-        break;
       default:
         await interaction.reply({
           ephemeral: true,
           content: "Unknown action.",
         });
-        return true;
+        return;
     }
     await interaction.reply({
       ephemeral: true,
@@ -176,5 +385,4 @@ export async function handleVoiceMasterButton(
       content: `Couldn’t update: ${msg.slice(0, 500)}`,
     });
   }
-  return true;
 }

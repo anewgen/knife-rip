@@ -13,7 +13,6 @@ import {
   VM_PANEL_NAME,
   applyGhost,
   applyLock,
-  applyMusicMode,
   applyNameTemplate,
   applyUnlock,
   applyUnghost,
@@ -593,23 +592,6 @@ export async function dispatchVoicemaster(
     }
     await applyUnghost(ctx.voice, ctx.temp.ownerId);
     await message.reply("Channel **unghosted**.");
-    return;
-  }
-
-  if (sub === "music") {
-    const ctx = await needTemp();
-    if (!ctx) return;
-    if (!ownerCanControl(member, ctx.temp.ownerId)) {
-      await message.reply("You don’t control this channel.");
-      return;
-    }
-    const b = parseBool(rest[0]);
-    if (b === null) {
-      await message.reply("Use **on** or **off** (`music on`).");
-      return;
-    }
-    await applyMusicMode(guild, ctx.voice, ctx.temp.ownerId, b);
-    await message.reply(`**Music mode** ${b ? "on" : "off"}.`);
     return;
   }
 

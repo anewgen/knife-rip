@@ -126,54 +126,6 @@ export async function setTempStatus(
   });
 }
 
-export async function setTempMusicOnly(
-  channelId: string,
-  on: boolean,
-): Promise<void> {
-  await getBotPrisma().voiceMasterTempChannel.update({
-    where: { channelId },
-    data: { musicOnly: on },
-  });
-}
-
-async function syncMusicPermissions(
-  guild: Guild,
-  voice: VoiceBasedChannel,
-  ownerId: string,
-  on: boolean,
-): Promise<void> {
-  const everyone = guild.roles.everyone;
-  if (on) {
-    await voice.permissionOverwrites.edit(everyone, {
-      Speak: false,
-      Connect: true,
-      ViewChannel: true,
-    });
-    await voice.permissionOverwrites.edit(ownerId, {
-      Speak: true,
-      Connect: true,
-      ViewChannel: true,
-    });
-  } else {
-    await voice.permissionOverwrites.edit(everyone, {
-      Speak: null,
-    });
-    await voice.permissionOverwrites.edit(ownerId, {
-      Speak: null,
-    });
-  }
-}
-
-export async function applyMusicMode(
-  guild: Guild,
-  voice: VoiceBasedChannel,
-  ownerId: string,
-  on: boolean,
-): Promise<void> {
-  await setTempMusicOnly(voice.id, on);
-  await syncMusicPermissions(guild, voice, ownerId, on);
-}
-
 export async function applyLock(
   voice: VoiceBasedChannel,
   ownerId: string,

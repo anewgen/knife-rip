@@ -28,7 +28,6 @@ const SINGLE_GLUES: string[] = [
   "unghost",
   "ghost",
   "claim",
-  "music",
   "lock",
   "setup",
   "reset",

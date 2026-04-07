@@ -206,9 +206,9 @@ const CANONICAL_UNSORTED: CanonicalCommandSiteRow[] = [
   {
     name: "voicemaster",
     description:
-      "VoiceMaster — join-to-create temporary voice channels with lock, ghost, permit, transfer, and server defaults",
+      "VoiceMaster — temp voice channels from a hub; paginated panel (lock, ghost, disconnect picker, info, user limit, rename) plus permit, transfer, defaults",
     usage:
-      ".voicemaster help · .voicemaster setup · .vmsetup · .vm lock · .voicemaster join",
+      ".voicemaster setup · panel (🔒 lock · 👻 ghost · disconnect · ➕ limit · ✏ rename) · .vm join",
     tier: "free",
     style: "prefix",
     aliases: ["vm"],

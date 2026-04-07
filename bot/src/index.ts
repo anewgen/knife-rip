@@ -4,7 +4,7 @@ import {
   GatewayIntentBits,
   Partials,
 } from "discord.js";
-import { handleVoiceMasterButton } from "./lib/voicemaster/interaction-handler";
+import { handleVoiceMasterInteraction } from "./lib/voicemaster/interaction-handler";
 import { tryExpandGluedVoicemaster } from "./lib/voicemaster/parse-invoke";
 import { handleVoiceMasterVoiceState } from "./lib/voicemaster/voice-handler";
 import { reconcileOrphanTemps } from "./lib/voicemaster/service";
@@ -78,7 +78,7 @@ client.once(Events.ClientReady, async (c) => {
 
 client.on(Events.InteractionCreate, async (interaction) => {
   try {
-    await handleVoiceMasterButton(interaction);
+    await handleVoiceMasterInteraction(interaction);
   } catch (err) {
     console.warn("VoiceMaster interaction:", err);
   }
