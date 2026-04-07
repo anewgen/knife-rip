@@ -89,7 +89,7 @@ function CommandsLoaderOverlay({ open }: { open: boolean }) {
           role="status"
           aria-busy="true"
           aria-live="polite"
-          className="fixed inset-0 z-[200] flex flex-col items-center justify-center gap-5 border-b border-red-950/35 bg-background/88 backdrop-blur-xl backdrop-saturate-150"
+          className="fixed inset-0 z-[200] flex flex-col items-center justify-center gap-6 bg-background/75 backdrop-blur-xl backdrop-saturate-150"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -99,32 +99,23 @@ function CommandsLoaderOverlay({ open }: { open: boolean }) {
           }}
           style={{ willChange: "opacity" }}
         >
-          <div
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_75%_55%_at_50%_42%,rgba(220,38,38,0.16),transparent_68%)]"
-            aria-hidden
-          />
           <span className="sr-only">Loading commands</span>
           <p
-            className="relative text-[10px] font-semibold uppercase tracking-[0.28em] text-muted"
+            className="text-[10px] font-semibold uppercase tracking-[0.32em] text-muted"
             aria-hidden
           >
             Loading
           </p>
-          <div
-            className="relative rounded-[1.25rem] border border-red-950/35 bg-surface/85 px-11 py-9 shadow-[var(--shadow-glow-primary),var(--shadow-glow)] ring-1 ring-inset ring-white/[0.05]"
-          >
+          {/* Same surface language as homepage hero panel (app/page.tsx) */}
+          <div className="hero-backdrop hero-rim hero-sheen-live relative min-w-[13.5rem] overflow-hidden rounded-[1.35rem] border border-white/[0.07] px-12 py-10 sm:min-w-[15rem] sm:p-11">
             <div
-              className="pointer-events-none absolute inset-0 rounded-[inherit] bg-gradient-to-br from-red-950/22 via-transparent to-transparent"
-              aria-hidden
-            />
-            <div
-              className="pointer-events-none absolute left-1/2 top-1/2 h-36 w-36 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[rgba(220,38,38,0.22)] blur-3xl motion-reduce:opacity-80"
+              className="pointer-events-none absolute inset-0 rounded-[inherit] bg-gradient-to-br from-red-950/18 via-transparent to-transparent"
               aria-hidden
             />
             <motion.div
-              className="relative flex items-center justify-center"
+              className="relative flex items-center justify-center pt-0.5"
               animate={
-                reduce ? undefined : { opacity: [0.82, 1, 0.82] }
+                reduce ? undefined : { opacity: [0.85, 1, 0.85] }
               }
               transition={
                 reduce
@@ -138,7 +129,7 @@ function CommandsLoaderOverlay({ open }: { open: boolean }) {
               style={{ willChange: reduce ? "auto" : "opacity" }}
             >
               <BrandMark
-                className="relative size-[3.75rem] text-edge sm:size-16"
+                className="size-14 text-edge sm:size-[4.25rem]"
                 aria-hidden
               />
             </motion.div>
