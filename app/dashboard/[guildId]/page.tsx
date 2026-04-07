@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Card } from "@/components/ui/card";
 import { db } from "@/lib/db";
@@ -79,7 +80,11 @@ export default async function GuildDashboardPage({ params }: PageProps) {
         </Link>
       </nav>
 
-      <header className="reveal flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
+      <ScrollReveal
+        as="header"
+        className="flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8"
+        amount={0.12}
+      >
         {icon ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -128,9 +133,9 @@ export default async function GuildDashboardPage({ params }: PageProps) {
             )}
           </div>
         </div>
-      </header>
+      </ScrollReveal>
 
-      <div className="reveal reveal-delay-1 grid gap-4 sm:grid-cols-2">
+      <ScrollReveal as="div" className="grid gap-4 sm:grid-cols-2" delay={0.05} amount={0.1}>
         <Card padding="md" elevated className="sm:col-span-2">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">
             Overview
@@ -180,7 +185,7 @@ export default async function GuildDashboardPage({ params }: PageProps) {
             {guild.id}
           </p>
         </Card>
-      </div>
+      </ScrollReveal>
     </main>
   );
 }

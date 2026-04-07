@@ -1,4 +1,8 @@
 import { PageShell } from "@/components/page-shell";
+import {
+  StaggerChildren,
+  StaggerItem,
+} from "@/components/motion/stagger-children";
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { resolveCommunityDiscordInviteUrl } from "@/lib/community-discord";
@@ -24,9 +28,9 @@ export default function DocsIndexPage() {
       title="Docs"
       description="How to get started, what permissions matter, and how Knife Pro billing works."
     >
-      <ul className="!mt-0 grid gap-3">
+      <StaggerChildren as="ul" className="!mt-0 grid gap-3">
         {pages.map((p) => (
-          <li key={p.href}>
+          <StaggerItem as="li" key={p.href}>
             <Link href={p.href} className="block motion-safe:transition">
               <Card
                 padding="md"
@@ -39,9 +43,9 @@ export default function DocsIndexPage() {
                 </span>
               </Card>
             </Link>
-          </li>
+          </StaggerItem>
         ))}
-        <li>
+        <StaggerItem as="li">
           <Link href="/commands" className="block motion-safe:transition">
             <Card
               padding="md"
@@ -57,8 +61,8 @@ export default function DocsIndexPage() {
               </span>
             </Card>
           </Link>
-        </li>
-        <li>
+        </StaggerItem>
+        <StaggerItem as="li">
           <a
             href={communityHubInvite}
             target="_blank"
@@ -79,8 +83,8 @@ export default function DocsIndexPage() {
               </span>
             </Card>
           </a>
-        </li>
-      </ul>
+        </StaggerItem>
+      </StaggerChildren>
     </PageShell>
   );
 }

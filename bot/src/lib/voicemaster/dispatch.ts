@@ -93,7 +93,9 @@ export async function dispatchVoicemaster(
         "Temporary voice channels from a hub. Main command: **`.voicemaster`** — alias: **`.vm`**.\n\n" +
         "Setup: **`.voicemaster setup`** (Administrator) — creates a category, hub VC, and this panel.\n" +
         "Glued: **`.vmsetup`**, **`.vmlock`**, **`.vmjoinrole`**, etc.\n\n" +
-        "See the pinned-style panel in **#voice-master** after setup, or **`/commands`** on the site.",
+        "See the pinned-style panel in **#" +
+        VM_PANEL_NAME +
+        "** after setup, or **`/commands`** on the site.",
     });
     await message.reply({ embeds: [embed] });
     return;

@@ -1,5 +1,7 @@
 import {
+  ActionRowBuilder,
   EmbedBuilder,
+  UserSelectMenuBuilder,
   type ButtonInteraction,
   type Interaction,
   type ModalSubmitInteraction,
@@ -21,6 +23,8 @@ import {
   panelCustomId,
   VM_FIELD_RENAME,
   VM_MODAL_RENAME,
+  VM_PANEL_PAGES,
+  VM_SEL_DISCONNECT_CTX,
 } from "./panel-ui";
 
 async function requireVoiceTemp(interaction: Interaction) {
@@ -157,12 +161,49 @@ async function handleRenameModal(interaction: ModalSubmitInteraction) {
 }
 
 async function handleDisconnectSelect(interaction: UserSelectMenuInteraction) {
-  if (interaction.customId !== panelCustomId("sel", "disconnect")) return;
   if (!interaction.guild) return;
 
-  const ctx = await requireVoiceTemp(interaction);
-  if (!ctx) return;
-  if (!ownerCanControl(ctx.member, ctx.temp.ownerId)) {
+  const legacyId = panelCustomId("sel", "disconnect");
+  const ctxPrefix = `${VM_SEL_DISCONNECT_CTX}:`;
+
+  let pinnedChannelId: string | undefined;
+  if (interaction.customId === legacyId) {
+    pinnedChannelId = undefined;
+  } else if (interaction.customId.startsWith(ctxPrefix)) {
+    const rest = interaction.customId.slice(ctxPrefix.length);
+    if (!/^\d{17,20}$/.test(rest)) return;
+    pinnedChannelId = rest;
+  } else {
+    return;
+  }
+
+  const member = await interaction.guild.members.fetch(interaction.user.id);
+  const voice = member.voice.channel;
+  if (!voice?.isVoiceBased()) {
+    await interaction.reply({
+      ephemeral: true,
+      content: "Join your VoiceMaster channel first.",
+    });
+    return;
+  }
+  if (pinnedChannelId && voice.id !== pinnedChannelId) {
+    await interaction.reply({
+      ephemeral: true,
+      content:
+        "That picker was for another channel. Press **Disconnect** on the panel again.",
+    });
+    return;
+  }
+
+  const temp = await getTempByChannel(voice.id);
+  if (!temp) {
+    await interaction.reply({
+      ephemeral: true,
+      content: "This isn’t a VoiceMaster temporary channel.",
+    });
+    return;
+  }
+  if (!ownerCanControl(member, temp.ownerId)) {
     await interaction.reply({
       ephemeral: true,
       content: "You don’t control this channel.",
@@ -171,7 +212,7 @@ async function handleDisconnectSelect(interaction: UserSelectMenuInteraction) {
   }
 
   const targetId = interaction.values[0];
-  if (targetId === ctx.member.id) {
+  if (targetId === member.id) {
     await interaction.reply({
       ephemeral: true,
       content: "Pick someone else to disconnect.",
@@ -180,7 +221,7 @@ async function handleDisconnectSelect(interaction: UserSelectMenuInteraction) {
   }
 
   const target = await interaction.guild.members.fetch(targetId).catch(() => null);
-  if (!target?.voice.channel || target.voice.channelId !== ctx.voice.id) {
+  if (!target?.voice.channel || target.voice.channelId !== voice.id) {
     await interaction.reply({
       ephemeral: true,
       content: "That member isn’t in this voice channel.",
@@ -213,7 +254,10 @@ async function handleVmButton(interaction: ButtonInteraction) {
   const kind = parts[1];
 
   if (kind === "nav") {
-    const page = Math.min(2, Math.max(0, Number(parts[2] ?? 0) || 0));
+    const page = Math.min(
+      VM_PANEL_PAGES - 1,
+      Math.max(0, Number(parts[2] ?? 0) || 0),
+    );
     await interaction.update(buildPanelPayload(page));
     return;
   }
@@ -292,6 +336,30 @@ async function handleVmButton(interaction: ButtonInteraction) {
       return;
     }
     await interaction.showModal(buildRenameModal());
+    return;
+  }
+
+  if (action === "disconnect") {
+    if (!ownerCanControl(member, temp.ownerId)) {
+      await interaction.reply({
+        ephemeral: true,
+        content: "You don’t control this channel.",
+      });
+      return;
+    }
+    const row =
+      new ActionRowBuilder<UserSelectMenuBuilder>().addComponents(
+        new UserSelectMenuBuilder()
+          .setCustomId(`${VM_SEL_DISCONNECT_CTX}:${voice.id}`)
+          .setPlaceholder("Choose a member…")
+          .setMinValues(1)
+          .setMaxValues(1),
+      );
+    await interaction.reply({
+      ephemeral: true,
+      content: "Select a member to disconnect from your channel.",
+      components: [row],
+    });
     return;
   }
 

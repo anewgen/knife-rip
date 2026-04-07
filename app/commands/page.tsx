@@ -1,4 +1,5 @@
 import { CommandsCatalog } from "@/components/commands-catalog";
+import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Card } from "@/components/ui/card";
 import { getCommandCatalogMeta } from "@/lib/commands";
@@ -17,7 +18,7 @@ export default async function CommandsPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-12 px-4 py-14 sm:gap-14 sm:px-6 sm:py-20">
-      <header className="reveal border-b border-red-950/35 pb-10">
+      <ScrollReveal as="header" className="border-b border-red-950/35 pb-10" amount={0.15}>
         <span
           className="mb-4 block h-1 w-10 rounded-full bg-gradient-to-r from-edge/70 via-edge/30 to-transparent"
           aria-hidden
@@ -48,13 +49,14 @@ export default async function CommandsPage() {
             Permissions
           </ButtonLink>
         </div>
-      </header>
+      </ScrollReveal>
 
       {categories.length === 0 ? (
-        <Card
-          padding="lg"
-          className="reveal border-dashed border-white/[0.12] bg-surface/30"
-        >
+        <ScrollReveal as="div" delay={0.04}>
+          <Card
+            padding="lg"
+            className="border-dashed border-white/[0.12] bg-surface/30"
+          >
           <p className="font-display text-lg font-semibold text-accent-strong">
             Command list is loading
           </p>
@@ -67,21 +69,24 @@ export default async function CommandsPage() {
             for a link back here.
           </p>
         </Card>
+        </ScrollReveal>
       ) : (
         <CommandsCatalog categories={categories} />
       )}
 
       {process.env.NODE_ENV === "development" ? (
-        <Card
-          padding="md"
-          className="reveal reveal-delay-2 border-white/[0.06] bg-surface/40"
-        >
+        <ScrollReveal as="div" delay={0.08}>
+          <Card
+            padding="md"
+            className="border-white/[0.06] bg-surface/40"
+          >
           <p className="text-sm leading-relaxed text-muted">
             <strong className="text-foreground">Developers:</strong> command
             source lives in the <code className="font-mono text-xs">bot/</code>{" "}
             package in this repo.
           </p>
         </Card>
+        </ScrollReveal>
       ) : null}
     </main>
   );

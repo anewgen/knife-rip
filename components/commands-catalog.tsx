@@ -1,6 +1,7 @@
 "use client";
 
 import { CommandAliasesDisclosure } from "@/components/command-aliases-disclosure";
+import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import type { BotCommand, CommandCategory } from "@/lib/commands";
@@ -122,11 +123,13 @@ export function CommandsCatalog({ categories }: Props) {
 
       <div className="flex flex-col gap-14">
         {filtered.map((cat) => (
-          <section
+          <ScrollReveal
+            as="section"
             key={cat.id}
             id={cat.id}
-            className="reveal scroll-mt-24"
+            className="scroll-mt-24"
             aria-labelledby={`cmd-cat-${cat.id}`}
+            amount={0.05}
           >
             <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -185,7 +188,7 @@ export function CommandsCatalog({ categories }: Props) {
                 );
               })}
             </ul>
-          </section>
+          </ScrollReveal>
         ))}
       </div>
     </div>

@@ -2,18 +2,30 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  EmbedBuilder,
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
-  UserSelectMenuBuilder,
   type MessageActionRowComponentBuilder,
 } from "discord.js";
-import { minimalEmbed } from "../embeds";
+import { getSiteApiBase } from "../../config";
+import {
+  VmAppEmoji,
+  vmEmojiButton,
+  vmEmojiMention,
+} from "./app-emojis";
 
-export const VM_PANEL_PAGES = 3;
+export const VM_PANEL_PAGES = 2;
+
+/** Shown on ephemeral disconnect picker (`vm:sel:disconnectctx:<channelId>`). */
+export const VM_SEL_DISCONNECT_CTX = panelCustomId("sel", "disconnectctx");
 
 export function panelCustomId(kind: string, extra = ""): string {
   return `vm:${kind}${extra ? `:${extra}` : ""}`.slice(0, 100);
+}
+
+export function getVmPanelIconUrl(): string {
+  return `${getSiteApiBase()}/voicemaster-panel.png`;
 }
 
 /** Modal + field ids (must stay stable for submit handler). */
@@ -36,35 +48,63 @@ export function buildRenameModal() {
   return modal;
 }
 
+function buildPanelEmbed(page: number, iconUrl: string): EmbedBuilder {
+  const p = Math.max(0, Math.min(VM_PANEL_PAGES - 1, page));
+  const base = getSiteApiBase();
+  const e = vmEmojiMention;
+
+  const lock = e(VmAppEmoji.lock);
+  const unlock = e(VmAppEmoji.unlock);
+  const ghost = e(VmAppEmoji.ghost);
+  const reveal = e(VmAppEmoji.reveal);
+  const claim = e(VmAppEmoji.claim);
+  const plug = e(VmAppEmoji.disconnect);
+  const info = e(VmAppEmoji.info);
+  const up = e(VmAppEmoji.limitUp);
+  const down = e(VmAppEmoji.limitDown);
+  const rename = e(VmAppEmoji.rename);
+
+  const usage =
+    `**Button Usage**\n` +
+    `${lock} — [**Lock**](${base}/commands) the voice channel\n` +
+    `${unlock} — [**Unlock**](${base}/commands) the voice channel\n` +
+    `${ghost} — [**Hide**](${base}/commands) the voice channel\n` +
+    `${reveal} — [**Reveal**](${base}/commands) the voice channel\n` +
+    `${claim} — [**Claim**](${base}/commands) the voice channel\n` +
+    `${plug} — [**Disconnect**](${base}/commands) a member from the voice channel\n` +
+    `${info} — [**Information**](${base}/commands) about the voice channel\n` +
+    `${up} / ${down} — [**Increase**](${base}/commands) / [**Decrease**](${base}/commands) user limit\n` +
+    `${rename} — [**Rename**](${base}/commands) the voice channel`;
+
+  const descriptions: Record<number, string> = {
+    0:
+      `Use the buttons below to control your voice channel.\n\n` +
+      `${usage}\n\n` +
+      `_Page ${p + 1} of ${VM_PANEL_PAGES}_`,
+    1:
+      `**Commands**\n` +
+      `Prefix: **\`.voicemaster\`** (alias **\`.vm\`**).\n\n` +
+      `• \`.vm name\`, \`.vm limit\`, \`.vm bitrate\`, \`.vm transfer @user\`, \`.vm configuration\`\n` +
+      `• Admins: \`.vm setup\`, \`.vm sendinterface\`, \`.vm reset\`\n\n` +
+      `_Page ${p + 1} of ${VM_PANEL_PAGES}_`,
+  };
+
+  return new EmbedBuilder()
+    .setColor(0xffffff)
+    .setAuthor({
+      name: "VoiceMaster Interface",
+      iconURL: iconUrl,
+      url: base,
+    })
+    .setThumbnail(iconUrl)
+    .setDescription(descriptions[p] ?? descriptions[0]);
+}
+
 export function buildPanelPayload(page: number) {
   const p = Math.max(0, Math.min(VM_PANEL_PAGES - 1, page));
-  const titles = [
-    "VoiceMaster — Access",
-    "VoiceMaster — Channel tools",
-    "VoiceMaster — Help",
-  ];
-  const bodies = [
-    "**Button guide (page 1)**\n" +
-      "🔒 Lock — only permitted users can connect\n" +
-      "🔓 Unlock — allow everyone to connect again\n" +
-      "👻 Ghost — hide the channel\n" +
-      "👁️ Unghost — show the channel again\n" +
-      "📌 Claim — take over an empty owner slot\n\n" +
-      "_Stay in **your** VoiceMaster channel while using these._",
-    "**Page 2**\n" +
-      "Use the **Disconnect** menu to remove someone from voice.\n" +
-      "ℹ️ **Info** — channel details (ephemeral)\n" +
-      "➕ **Increase limit** / ➖ **Decrease limit** — user cap (0 = no limit)\n" +
-      "✏️ **Rename** — opens a popup to set the name\n\n" +
-      "_Owner or Administrator._",
-    "Prefix: **`.voicemaster`** (alias **`.vm`**). Examples: `.voicemaster name`, `.voicemaster limit`, `.voicemaster bitrate`, `.voicemaster transfer @user`, `.voicemaster configuration`.\n\n" +
-      "Admins: `.voicemaster setup`, `.voicemaster sendinterface`, `.voicemaster reset`.",
-  ];
-
-  const embed = minimalEmbed({
-    title: titles[p] ?? titles[0],
-    description: `${bodies[p] ?? bodies[0]}\n\n_Page ${p + 1} of ${VM_PANEL_PAGES}_`,
-  });
+  const iconUrl = getVmPanelIconUrl();
+  const embed = buildPanelEmbed(p, iconUrl);
+  const be = vmEmojiButton;
 
   const rowButtons = (parts: MessageActionRowComponentBuilder[]) =>
     new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
@@ -73,86 +113,69 @@ export function buildPanelPayload(page: number) {
 
   const rows: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [];
 
-  if (p === 0) {
-    rows.push(
-      rowButtons([
-        new ButtonBuilder()
-          .setCustomId(panelCustomId("act", "lock"))
-          .setLabel("Lock")
-          .setStyle(ButtonStyle.Secondary)
-          .setEmoji("🔒"),
-        new ButtonBuilder()
-          .setCustomId(panelCustomId("act", "unlock"))
-          .setLabel("Unlock")
-          .setStyle(ButtonStyle.Secondary)
-          .setEmoji("🔓"),
-        new ButtonBuilder()
-          .setCustomId(panelCustomId("act", "ghost"))
-          .setLabel("Ghost")
-          .setStyle(ButtonStyle.Secondary)
-          .setEmoji("👻"),
-        new ButtonBuilder()
-          .setCustomId(panelCustomId("act", "unghost"))
-          .setLabel("Unghost")
-          .setStyle(ButtonStyle.Secondary)
-          .setEmoji("👁️"),
-        new ButtonBuilder()
-          .setCustomId(panelCustomId("act", "claim"))
-          .setLabel("Claim")
-          .setStyle(ButtonStyle.Primary)
-          .setEmoji("📌"),
-      ]),
-    );
-  } else if (p === 1) {
-    const disconnectRow =
-      new ActionRowBuilder<UserSelectMenuBuilder>().addComponents(
-        new UserSelectMenuBuilder()
-          .setCustomId(panelCustomId("sel", "disconnect"))
-          .setPlaceholder("Disconnect a member…")
-          .setMinValues(1)
-          .setMaxValues(1),
-      );
-    rows.push(disconnectRow);
+  rows.push(
+    rowButtons([
+      new ButtonBuilder()
+        .setCustomId(panelCustomId("act", "lock"))
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji(be(VmAppEmoji.lock)),
+      new ButtonBuilder()
+        .setCustomId(panelCustomId("act", "unlock"))
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji(be(VmAppEmoji.unlock)),
+      new ButtonBuilder()
+        .setCustomId(panelCustomId("act", "ghost"))
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji(be(VmAppEmoji.ghost)),
+      new ButtonBuilder()
+        .setCustomId(panelCustomId("act", "unghost"))
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji(be(VmAppEmoji.reveal)),
+      new ButtonBuilder()
+        .setCustomId(panelCustomId("act", "claim"))
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji(be(VmAppEmoji.claim)),
+    ]),
+  );
 
-    rows.push(
-      rowButtons([
-        new ButtonBuilder()
-          .setCustomId(panelCustomId("act", "info"))
-          .setLabel("Info")
-          .setStyle(ButtonStyle.Secondary)
-          .setEmoji("ℹ️"),
-        new ButtonBuilder()
-          .setCustomId(panelCustomId("act", "liminc"))
-          .setLabel("Increase limit")
-          .setStyle(ButtonStyle.Success)
-          .setEmoji("➕"),
-        new ButtonBuilder()
-          .setCustomId(panelCustomId("act", "limdec"))
-          .setLabel("Decrease limit")
-          .setStyle(ButtonStyle.Secondary)
-          .setEmoji("➖"),
-        new ButtonBuilder()
-          .setCustomId(panelCustomId("act", "rename"))
-          .setLabel("Rename")
-          .setStyle(ButtonStyle.Primary)
-          .setEmoji("✏️"),
-      ]),
-    );
-  }
+  rows.push(
+    rowButtons([
+      new ButtonBuilder()
+        .setCustomId(panelCustomId("act", "disconnect"))
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji(be(VmAppEmoji.disconnect)),
+      new ButtonBuilder()
+        .setCustomId(panelCustomId("act", "info"))
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji(be(VmAppEmoji.info)),
+      new ButtonBuilder()
+        .setCustomId(panelCustomId("act", "liminc"))
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji(be(VmAppEmoji.limitUp)),
+      new ButtonBuilder()
+        .setCustomId(panelCustomId("act", "limdec"))
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji(be(VmAppEmoji.limitDown)),
+      new ButtonBuilder()
+        .setCustomId(panelCustomId("act", "rename"))
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji(be(VmAppEmoji.rename)),
+    ]),
+  );
 
   rows.push(
     rowButtons([
       new ButtonBuilder()
         .setCustomId(panelCustomId("nav", String(Math.max(0, p - 1))))
-        .setLabel("◀")
-        .setStyle(ButtonStyle.Primary)
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji(be(VmAppEmoji.arrowLeft))
         .setDisabled(p <= 0),
       new ButtonBuilder()
         .setCustomId(
           panelCustomId("nav", String(Math.min(VM_PANEL_PAGES - 1, p + 1))),
         )
-        .setLabel("▶")
-        .setStyle(ButtonStyle.Primary)
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji(be(VmAppEmoji.arrowRight))
         .setDisabled(p >= VM_PANEL_PAGES - 1),
     ]),
   );

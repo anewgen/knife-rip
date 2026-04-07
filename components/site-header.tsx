@@ -1,6 +1,7 @@
 "use client";
 
 import { BrandMark } from "@/components/brand-mark";
+import { CommandsNavLink } from "@/components/commands-route-loader";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/cn";
 import Link from "next/link";
@@ -45,20 +46,23 @@ export function SiteHeader() {
           aria-label="Main"
         >
           <div className="nav-pill-sheen inline-flex items-center gap-0.5 rounded-full border border-white/[0.07] bg-surface/45 px-1 py-1 shadow-[0_0_40px_-18px_rgba(220,38,38,0.18)] backdrop-blur-md">
-            {nav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "motion-safe:transition rounded-full px-4 py-2 text-sm font-medium tracking-tight",
-                  linkActive(pathname, item.href)
-                    ? "bg-surface-elevated/95 text-foreground shadow-sm ring-1 ring-white/[0.06]"
-                    : "text-muted hover:bg-white/[0.04] hover:text-foreground",
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {nav.map((item) => {
+              const NavComp = item.href === "/commands" ? CommandsNavLink : Link;
+              return (
+                <NavComp
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "motion-safe:transition rounded-full px-4 py-2 text-sm font-medium tracking-tight",
+                    linkActive(pathname, item.href)
+                      ? "bg-surface-elevated/95 text-foreground shadow-sm ring-1 ring-white/[0.06]"
+                      : "text-muted hover:bg-white/[0.04] hover:text-foreground",
+                  )}
+                >
+                  {item.label}
+                </NavComp>
+              );
+            })}
           </div>
         </nav>
 
@@ -129,21 +133,24 @@ export function SiteHeader() {
         inert={menuOpen ? undefined : true}
       >
         <nav className="flex flex-col gap-1 px-4 py-4" aria-label="Mobile">
-            {nav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={closeMenu}
-                className={cn(
-                  "motion-safe:transition rounded-xl px-3 py-3 text-sm font-medium",
-                  linkActive(pathname, item.href)
-                    ? "bg-surface-elevated text-foreground ring-1 ring-red-500/15"
-                    : "text-muted hover:bg-surface hover:text-foreground",
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {nav.map((item) => {
+              const NavComp = item.href === "/commands" ? CommandsNavLink : Link;
+              return (
+                <NavComp
+                  key={item.href}
+                  href={item.href}
+                  onClick={closeMenu}
+                  className={cn(
+                    "motion-safe:transition rounded-xl px-3 py-3 text-sm font-medium",
+                    linkActive(pathname, item.href)
+                      ? "bg-surface-elevated text-foreground ring-1 ring-red-500/15"
+                      : "text-muted hover:bg-surface hover:text-foreground",
+                  )}
+                >
+                  {item.label}
+                </NavComp>
+              );
+            })}
             <hr className="my-2 border-surface-border" />
             {status === "loading" ? (
               <span className="px-3 py-2 text-sm text-muted" aria-live="polite">

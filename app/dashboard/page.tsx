@@ -1,4 +1,9 @@
 import { auth } from "@/auth";
+import { ScrollReveal } from "@/components/motion/scroll-reveal";
+import {
+  StaggerChildren,
+  StaggerItem,
+} from "@/components/motion/stagger-children";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Card } from "@/components/ui/card";
@@ -97,9 +102,11 @@ export default async function DashboardPage({
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-10 px-4 py-12 sm:px-6">
       {showAlreadyPro ? (
-        <div
+        <ScrollReveal
+          as="div"
           role="status"
-          className="reveal rounded-xl border border-edge/25 bg-edge-muted/30 px-4 py-3 text-sm text-foreground/95"
+          className="rounded-xl border border-edge/25 bg-edge-muted/30 px-4 py-3 text-sm text-foreground/95"
+          amount={0.12}
         >
           <p className="font-medium text-accent-strong">
             You already have Knife Pro
@@ -107,13 +114,15 @@ export default async function DashboardPage({
           <p className="mt-1 text-muted">
             No need to check out again — Pro is tied to this Discord account.
           </p>
-        </div>
+        </ScrollReveal>
       ) : null}
 
       {showCheckoutThanks ? (
-        <div
+        <ScrollReveal
+          as="div"
           role="status"
-          className="reveal rounded-xl border border-success-border bg-success-muted px-4 py-3 text-sm text-foreground/95"
+          className="rounded-xl border border-success-border bg-success-muted px-4 py-3 text-sm text-foreground/95"
+          amount={0.12}
         >
           <p className="font-medium text-success-foreground">
             Thanks — Knife Pro is active
@@ -122,13 +131,15 @@ export default async function DashboardPage({
             You can use Pro features everywhere you run the bot. Receipts are
             in your email from Stripe.
           </p>
-        </div>
+        </ScrollReveal>
       ) : null}
 
       {showCheckoutPending ? (
-        <div
+        <ScrollReveal
+          as="div"
           role="status"
-          className="reveal rounded-xl border border-amber-500/30 bg-amber-500/[0.08] px-4 py-3 text-sm text-foreground/95"
+          className="rounded-xl border border-amber-500/30 bg-amber-500/[0.08] px-4 py-3 text-sm text-foreground/95"
+          amount={0.12}
         >
           <p className="font-medium text-amber-100/95">
             Finishing your purchase…
@@ -137,14 +148,15 @@ export default async function DashboardPage({
             If Pro still shows as inactive after a minute, refresh this page or
             contact support — the webhook may still be processing.
           </p>
-        </div>
+        </ScrollReveal>
       ) : null}
 
-      <Card
-        padding="lg"
-        elevated
-        className="reveal flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between"
-      >
+      <ScrollReveal as="div" delay={0.03} amount={0.1}>
+        <Card
+          padding="lg"
+          elevated
+          className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between"
+        >
         <div className="flex items-center gap-4">
           {session.user.image ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -203,8 +215,9 @@ export default async function DashboardPage({
           ) : null}
         </div>
       </Card>
+      </ScrollReveal>
 
-      <section className="reveal reveal-delay-1 space-y-4">
+      <ScrollReveal as="section" className="space-y-4" delay={0.04} amount={0.08}>
         <div>
           <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">
             Servers with Knife
@@ -261,11 +274,11 @@ export default async function DashboardPage({
             </p>
           </Card>
         ) : (
-          <ul className="space-y-2">
+          <StaggerChildren as="ul" className="space-y-2">
             {knifeGuilds.map((g) => {
               const icon = guildIconUrl(g.id, g.icon);
               return (
-                <li key={g.id}>
+                <StaggerItem as="li" key={g.id}>
                   <Link
                     href={`/dashboard/${g.id}`}
                     className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
@@ -302,15 +315,15 @@ export default async function DashboardPage({
                       </span>
                     </Card>
                   </Link>
-                </li>
+                </StaggerItem>
               );
             })}
-          </ul>
+          </StaggerChildren>
         )}
-      </section>
+      </ScrollReveal>
 
       {!guildError && inviteCandidates.length > 0 ? (
-        <section className="reveal reveal-delay-2 space-y-3">
+        <ScrollReveal as="section" className="space-y-3" delay={0.05} amount={0.08}>
           <div>
             <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">
               Add Knife elsewhere
@@ -357,7 +370,7 @@ export default async function DashboardPage({
               );
             })}
           </ul>
-        </section>
+        </ScrollReveal>
       ) : null}
     </main>
   );

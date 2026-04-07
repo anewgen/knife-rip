@@ -1,4 +1,10 @@
+import { CommandsNavLink } from "@/components/commands-route-loader";
 import { HeroOrnament } from "@/components/decorative/hero-ornament";
+import { ScrollReveal } from "@/components/motion/scroll-reveal";
+import {
+  StaggerChildren,
+  StaggerItem,
+} from "@/components/motion/stagger-children";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
@@ -146,7 +152,10 @@ export default async function Home() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-16 px-4 py-14 sm:gap-20 sm:px-6 sm:py-20 lg:gap-22">
-      <section className="reveal grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] lg:gap-12">
+      <ScrollReveal
+        as="section"
+        className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] lg:gap-12"
+      >
         <div className="relative z-[1] min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-muted">
             Sharp stack · clean servers
@@ -256,10 +265,12 @@ export default async function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </ScrollReveal>
 
-      <section
-        className="reveal reveal-delay-1 border-t border-red-950/30 pt-14 sm:pt-16"
+      <ScrollReveal
+        as="section"
+        className="border-t border-red-950/30 pt-14 sm:pt-16"
+        delay={0.05}
         aria-labelledby="proof-heading"
       >
         <div className="mx-auto w-full max-w-6xl px-4">
@@ -295,9 +306,13 @@ export default async function Home() {
             )}
           </div>
         </div>
-      </section>
+      </ScrollReveal>
 
-      <section className="reveal reveal-delay-2" aria-labelledby="features-heading">
+      <ScrollReveal
+        as="section"
+        delay={0.06}
+        aria-labelledby="features-heading"
+      >
         <div className="mb-7 flex flex-col gap-2 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2
@@ -308,36 +323,42 @@ export default async function Home() {
             </h2>
             <p className="mt-2 max-w-lg text-sm font-normal leading-relaxed text-muted">
               Moderation, utilities, and engagement—without the bloat. See live commands on{" "}
-              <Link href="/commands" className="font-medium text-edge underline-offset-4 hover:underline">
+              <CommandsNavLink
+                href="/commands"
+                className="font-medium text-edge underline-offset-4 hover:underline"
+              >
                 Commands
-              </Link>
+              </CommandsNavLink>
               .
             </p>
           </div>
         </div>
-        <div className="grid auto-rows-fr gap-4 lg:grid-cols-3 lg:grid-rows-2">
+        <StaggerChildren className="grid auto-rows-fr gap-4 lg:grid-cols-3 lg:grid-rows-2">
           {features.map((f) => (
-            <Card
-              key={f.title}
-              padding="lg"
-              elevated
-              className={`motion-safe:transition hover:border-white/[0.09] ${f.span}`}
-            >
-              <div className="mb-3.5 h-px w-10 rounded-full bg-gradient-to-r from-edge/50 via-edge/25 to-transparent" />
-              <h3 className="font-display text-lg font-semibold text-accent-strong">
-                {f.title}
-              </h3>
-              <p className="mt-3 text-sm font-normal leading-relaxed text-muted">
-                {f.body}
-              </p>
-            </Card>
+            <StaggerItem key={f.title} className={f.span}>
+              <Card
+                padding="lg"
+                elevated
+                className="h-full motion-safe:transition hover:border-white/[0.09]"
+              >
+                <div className="mb-3.5 h-px w-10 rounded-full bg-gradient-to-r from-edge/50 via-edge/25 to-transparent" />
+                <h3 className="font-display text-lg font-semibold text-accent-strong">
+                  {f.title}
+                </h3>
+                <p className="mt-3 text-sm font-normal leading-relaxed text-muted">
+                  {f.body}
+                </p>
+              </Card>
+            </StaggerItem>
           ))}
-        </div>
-      </section>
+        </StaggerChildren>
+      </ScrollReveal>
 
-      <section
+      <ScrollReveal
+        as="section"
         aria-labelledby="how-heading"
-        className="reveal reveal-delay-3 border-t border-red-950/30 pt-14 sm:pt-16"
+        className="border-t border-red-950/30 pt-14 sm:pt-16"
+        delay={0.04}
       >
         <h2
           id="how-heading"
@@ -345,34 +366,39 @@ export default async function Home() {
         >
           How it works
         </h2>
-        <div className="relative mt-9 grid gap-5 sm:grid-cols-3 sm:gap-6">
+        <div className="relative mt-9">
           <div
             className="timeline-glow pointer-events-none absolute left-0 right-0 top-7 hidden h-px bg-gradient-to-r from-transparent via-red-400/35 to-transparent sm:block"
             aria-hidden
           />
-          {steps.map((s) => (
-            <Card
-              key={s.n}
-              padding="md"
-              className="relative overflow-hidden motion-safe:transition hover:border-white/[0.09]"
-            >
-              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-edge/75">
-                {s.n}
-              </span>
-              <h3 className="mt-2.5 font-display text-base font-semibold text-foreground">
-                {s.title}
-              </h3>
-              <p className="mt-2 text-sm font-normal leading-relaxed text-muted">
-                {s.body}
-              </p>
-            </Card>
-          ))}
+          <StaggerChildren className="grid gap-5 sm:grid-cols-3 sm:gap-6">
+            {steps.map((s) => (
+              <StaggerItem key={s.n}>
+                <Card
+                  padding="md"
+                  className="relative h-full overflow-hidden motion-safe:transition hover:border-white/[0.09]"
+                >
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-edge/75">
+                    {s.n}
+                  </span>
+                  <h3 className="mt-2.5 font-display text-base font-semibold text-foreground">
+                    {s.title}
+                  </h3>
+                  <p className="mt-2 text-sm font-normal leading-relaxed text-muted">
+                    {s.body}
+                  </p>
+                </Card>
+              </StaggerItem>
+            ))}
+          </StaggerChildren>
         </div>
-      </section>
+      </ScrollReveal>
 
-      <section
+      <ScrollReveal
+        as="section"
         aria-labelledby="faq-heading"
-        className="reveal reveal-delay-4 border-t border-red-950/30 pt-14 sm:pt-16"
+        className="border-t border-red-950/30 pt-14 sm:pt-16"
+        delay={0.04}
       >
         <h2
           id="faq-heading"
@@ -380,9 +406,12 @@ export default async function Home() {
         >
           Quick answers
         </h2>
-        <ul className="mt-8 grid gap-4 sm:grid-cols-3 sm:gap-5">
+        <StaggerChildren
+          as="ul"
+          className="mt-8 grid gap-4 sm:grid-cols-3 sm:gap-5"
+        >
           {faqs.map((item) => (
-            <li key={item.q}>
+            <StaggerItem key={item.q} as="li">
               <Card
                 padding="md"
                 className="h-full motion-safe:transition hover:border-white/[0.09]"
@@ -405,10 +434,10 @@ export default async function Home() {
                   />
                 </Link>
               </Card>
-            </li>
+            </StaggerItem>
           ))}
-        </ul>
-      </section>
+        </StaggerChildren>
+      </ScrollReveal>
     </div>
   );
 }

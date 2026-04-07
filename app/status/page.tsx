@@ -18,7 +18,7 @@ export default function StatusPage() {
       <Card
         padding="lg"
         elevated
-        className="reveal border-success-border bg-success-muted"
+        className="border-success-border bg-success-muted"
       >
         <p className="flex items-center gap-2 font-medium text-success">
           <Icon

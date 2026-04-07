@@ -11,8 +11,8 @@ import type { VoiceMasterGuildConfig } from "@prisma/client";
 import { getBotPrisma } from "../db-prisma";
 
 export const VM_CATEGORY_NAME = "Voice Master";
-export const VM_HUB_NAME = "➕ Join to create";
-export const VM_PANEL_NAME = "voice-master";
+export const VM_HUB_NAME = "join 2 create";
+export const VM_PANEL_NAME = "interface";
 
 export async function getGuildConfig(
   guildId: string,

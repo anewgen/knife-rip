@@ -1,3 +1,4 @@
+import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import { cn } from "@/lib/cn";
 import type { ReactNode } from "react";
 
@@ -28,12 +29,14 @@ export function PageShell({
   prelude,
 }: PageShellProps) {
   return (
-    <main
+    <ScrollReveal
+      as="main"
       className={cn(
-        "page-reveal mx-auto flex w-full flex-1 flex-col gap-8 px-4 py-16 sm:px-6 sm:py-20",
+        "mx-auto flex w-full flex-1 flex-col gap-8 px-4 py-16 sm:px-6 sm:py-20",
         maxW[maxWidth],
         className,
       )}
+      amount={0.06}
     >
       {prelude ? (
         <div className="-mb-2 text-sm text-muted">{prelude}</div>
@@ -53,6 +56,6 @@ export function PageShell({
         ) : null}
       </header>
       <div className="prose-docs text-muted">{children}</div>
-    </main>
+    </ScrollReveal>
   );
 }

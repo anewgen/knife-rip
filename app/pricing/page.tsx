@@ -1,5 +1,10 @@
 import { CheckoutSubmitButton } from "@/components/checkout-submit-button";
 import { ProCardFlourish } from "@/components/decorative/pro-card-flourish";
+import { ScrollReveal } from "@/components/motion/scroll-reveal";
+import {
+  StaggerChildren,
+  StaggerItem,
+} from "@/components/motion/stagger-children";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
@@ -47,7 +52,11 @@ export default function PricingPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-12 px-4 py-14 sm:gap-16 sm:px-6 sm:py-20">
-      <header className="reveal mx-auto max-w-2xl text-center">
+      <ScrollReveal
+        as="header"
+        className="mx-auto max-w-2xl text-center"
+        amount={0.2}
+      >
         <span
           className="mx-auto mb-4 block h-1 w-10 rounded-full bg-gradient-to-r from-edge/70 via-edge/30 to-transparent"
           aria-hidden
@@ -79,12 +88,14 @@ export default function PricingPage() {
             Billing FAQ
           </ButtonLink>
         </div>
-      </header>
+      </ScrollReveal>
 
       {!checkoutReady ? (
-        <div
+        <ScrollReveal
+          as="div"
           role="status"
-          className="reveal reveal-delay-1 mx-auto max-w-xl rounded-2xl border border-white/[0.08] bg-surface/50 px-5 py-4 text-center text-sm text-muted"
+          className="mx-auto max-w-xl rounded-2xl border border-white/[0.08] bg-surface/50 px-5 py-4 text-center text-sm text-muted"
+          delay={0.06}
         >
           <p className="font-medium text-foreground">
             Pro checkout isn&apos;t available right now
@@ -99,11 +110,12 @@ export default function PricingPage() {
             </a>{" "}
             if you need Knife Pro.
           </p>
-        </div>
+        </ScrollReveal>
       ) : null}
 
-      <div className="reveal reveal-delay-1 grid items-stretch gap-6 lg:grid-cols-2 lg:gap-8 lg:items-start">
-        <Card padding="lg" className="flex h-full flex-col">
+      <StaggerChildren className="grid items-stretch gap-6 lg:grid-cols-2 lg:gap-8 lg:items-start">
+        <StaggerItem>
+          <Card padding="lg" className="flex h-full flex-col">
           <div className="mb-4 h-px w-10 rounded-full bg-gradient-to-r from-muted/50 to-transparent" />
           <h2 className="font-display text-xl font-bold text-muted">Free</h2>
           <p className="mt-3 font-display text-4xl font-bold tabular-nums text-accent-strong sm:text-5xl">
@@ -132,13 +144,15 @@ export default function PricingPage() {
             </ButtonLink>
           </div>
         </Card>
+        </StaggerItem>
 
-        <Card
-          padding="lg"
-          elevated
-          surface="plain"
-          className="relative flex h-full min-h-0 flex-col overflow-hidden border-accent/20 bg-surface-elevated motion-safe:transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-glow)] lg:min-h-[28rem] ring-1 ring-edge/20"
-        >
+        <StaggerItem>
+          <Card
+            padding="lg"
+            elevated
+            surface="plain"
+            className="relative flex h-full min-h-0 flex-col overflow-hidden border-accent/20 bg-surface-elevated motion-safe:transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-glow)] lg:min-h-[28rem] ring-1 ring-edge/20"
+          >
           <div
             className="pointer-events-none absolute inset-0 rounded-[inherit] bg-gradient-to-br from-edge-muted/45 to-transparent"
             aria-hidden
@@ -187,10 +201,13 @@ export default function PricingPage() {
             </div>
           </div>
         </Card>
-      </div>
+        </StaggerItem>
+      </StaggerChildren>
 
-      <section
-        className="reveal reveal-delay-2 grid gap-4 border-t border-red-950/30 pt-12 sm:grid-cols-2"
+      <ScrollReveal
+        as="section"
+        className="grid gap-4 border-t border-red-950/30 pt-12 sm:grid-cols-2"
+        delay={0.08}
         aria-labelledby="pricing-more-heading"
       >
         <h2 id="pricing-more-heading" className="sr-only">
@@ -239,7 +256,7 @@ export default function PricingPage() {
             </div>
           </div>
         </Card>
-      </section>
+      </ScrollReveal>
     </main>
   );
 }
