@@ -12,6 +12,7 @@
     "vercel:env": "node scripts/vercel-env-sync.cjs",
     "start": "next start",
     "lint": "eslint",
+    "check:catalog": "node scripts/check-catalog-coverage.mjs",
     "postinstall": "prisma generate",
     "bot:dev": "npm run dev --prefix bot",
     "bot:start": "npm run start --prefix bot"

@@ -105,33 +105,51 @@ function mergeCanonicalCatalog(db: CommandCategory[]): CommandCategory[] {
   return sorted;
 }
 
-/** Server-only: latest categories from the bot sync (empty if never synced). */
+/** Full list from built-in catalog when the bot has not POSTed a snapshot yet (or DB unreachable). */
+function fallbackCategories(): CommandCategory[] {
+  return mergeCanonicalCatalog([]);
+}
+
+/** Server-only: latest categories from the bot sync, merged with canonical rows. */
 export async function getCommandCategories(): Promise<CommandCategory[]> {
   try {
     const row = await db.botCommandSnapshot.findUnique({
       where: { id: COMMAND_SNAPSHOT_ID },
     });
-    if (!row) return [];
+    if (!row) return fallbackCategories();
     return parsePayload(row.payload);
   } catch {
-    return [];
+    return fallbackCategories();
   }
 }
 
 export async function getCommandCatalogMeta(): Promise<{
   categories: CommandCategory[];
   updatedAt: Date | null;
+  /** True when no snapshot row exists yet — list still shows merged canonical catalog. */
+  catalogSyncPending: boolean;
 }> {
   try {
     const row = await db.botCommandSnapshot.findUnique({
       where: { id: COMMAND_SNAPSHOT_ID },
     });
-    if (!row) return { categories: [], updatedAt: null };
+    if (!row) {
+      return {
+        categories: fallbackCategories(),
+        updatedAt: null,
+        catalogSyncPending: true,
+      };
+    }
     return {
       categories: parsePayload(row.payload),
       updatedAt: row.updatedAt,
+      catalogSyncPending: false,
     };
   } catch {
-    return { categories: [], updatedAt: null };
+    return {
+      categories: fallbackCategories(),
+      updatedAt: null,
+      catalogSyncPending: true,
+    };
   }
 }

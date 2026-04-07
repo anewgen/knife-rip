@@ -3,12 +3,19 @@ import { resolve } from "path";
 
 const LOCK_NAME = ".knife-bot.lock";
 
+/** `bot/` directory — lock path does not depend on `process.cwd()` (restarts & PM2 cwd-safe). */
+const BOT_PACKAGE_ROOT = resolve(__dirname, "..", "..");
+
 /**
  * Exit if another local process already holds the lock (same machine).
  * Prevents duplicate replies when two terminals run the bot with the same token.
  */
 export function acquireSingleInstanceLock(): void {
-  const lockPath = resolve(process.cwd(), LOCK_NAME);
+  if (process.env.KNIFE_BOT_DISABLE_SINGLE_INSTANCE_LOCK === "1") {
+    return;
+  }
+
+  const lockPath = resolve(BOT_PACKAGE_ROOT, LOCK_NAME);
 
   if (existsSync(lockPath)) {
     try {

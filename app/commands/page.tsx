@@ -14,7 +14,8 @@ export const metadata: Metadata = {
 };
 
 export default async function CommandsPage() {
-  const { categories, updatedAt } = await getCommandCatalogMeta();
+  const { categories, updatedAt, catalogSyncPending } =
+    await getCommandCatalogMeta();
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-12 px-4 py-14 sm:gap-14 sm:px-6 sm:py-20">
@@ -41,6 +42,12 @@ export default async function CommandsPage() {
               </time>
               .
             </>
+          ) : catalogSyncPending ? (
+            <>
+              {" "}
+              Showing the bundled catalog until the bot syncs (no snapshot in
+              the database yet).
+            </>
           ) : null}
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
@@ -57,18 +64,17 @@ export default async function CommandsPage() {
             padding="lg"
             className="border-dashed border-white/[0.12] bg-surface/30"
           >
-          <p className="font-display text-lg font-semibold text-accent-strong">
-            Command list is loading
-          </p>
-          <p className="mt-3 text-sm leading-relaxed text-muted">
-            If this stays empty, the bot may still be connecting—try again
-            shortly. In Discord, use{" "}
-            <code className="rounded-md bg-surface-elevated px-1.5 py-0.5 font-mono text-xs">
-              .help
-            </code>{" "}
-            for a link back here.
-          </p>
-        </Card>
+            <p className="font-display text-lg font-semibold text-accent-strong">
+              Command list unavailable
+            </p>
+            <p className="mt-3 text-sm leading-relaxed text-muted">
+              The bundled catalog failed to load. In Discord, use{" "}
+              <code className="rounded-md bg-surface-elevated px-1.5 py-0.5 font-mono text-xs">
+                .help
+              </code>{" "}
+              for a link back here.
+            </p>
+          </Card>
         </ScrollReveal>
       ) : (
         <CommandsCatalog categories={categories} />

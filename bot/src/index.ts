@@ -70,8 +70,22 @@ client.once(Events.ClientReady, async (c) => {
     );
   }
   try {
-    await syncRegistryToSite();
-    console.log("Command catalog synced to site.");
+    let lastErr: unknown;
+    let synced = false;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        await syncRegistryToSite();
+        console.log("Command catalog synced to site.");
+        synced = true;
+        break;
+      } catch (e) {
+        lastErr = e;
+        if (attempt < 2) {
+          await new Promise((r) => setTimeout(r, 2000));
+        }
+      }
+    }
+    if (!synced && lastErr) throw lastErr;
   } catch (err) {
     console.warn("Command catalog sync failed:", err);
   }
