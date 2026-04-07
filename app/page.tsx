@@ -1,4 +1,3 @@
-import { CommandsNavLink } from "@/components/commands-route-loader";
 import { HeroOrnament } from "@/components/decorative/hero-ornament";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import {
@@ -323,12 +322,12 @@ export default async function Home() {
             </h2>
             <p className="mt-2 max-w-lg text-sm font-normal leading-relaxed text-muted">
               Moderation, utilities, and engagement—without the bloat. See live commands on{" "}
-              <CommandsNavLink
+              <Link
                 href="/commands"
                 className="font-medium text-edge underline-offset-4 hover:underline"
               >
                 Commands
-              </CommandsNavLink>
+              </Link>
               .
             </p>
           </div>
