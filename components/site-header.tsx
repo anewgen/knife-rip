@@ -13,6 +13,7 @@ import { useState } from "react";
 
 const NAV: ReadonlyArray<{
   href: string;
+  icon: string;
   labelKey: keyof Pick<
     SiteMessages["header"],
     | "navDocs"
@@ -23,12 +24,12 @@ const NAV: ReadonlyArray<{
     | "navStatus"
   >;
 }> = [
-  { href: "/docs", labelKey: "navDocs" },
-  { href: "/changelog", labelKey: "navNews" },
-  { href: "/commands", labelKey: "navCommands" },
-  { href: "/tools/embed", labelKey: "navEmbed" },
-  { href: "/pricing", labelKey: "navPricing" },
-  { href: "/status", labelKey: "navStatus" },
+  { href: "/docs", labelKey: "navDocs", icon: "mdi:book-open-variant" },
+  { href: "/changelog", labelKey: "navNews", icon: "mdi:newspaper-variant-outline" },
+  { href: "/commands", labelKey: "navCommands", icon: "mdi:console" },
+  { href: "/tools/embed", labelKey: "navEmbed", icon: "mdi:widgets-outline" },
+  { href: "/pricing", labelKey: "navPricing", icon: "mdi:tag-outline" },
+  { href: "/status", labelKey: "navStatus", icon: "mdi:heart-pulse" },
 ];
 
 function linkActive(pathname: string, href: string) {
@@ -71,12 +72,17 @@ export function SiteHeader({ locale, header }: Props) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "motion-safe:transition rounded-full px-4 py-2 text-sm font-medium tracking-tight",
+                  "motion-safe:transition inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium tracking-tight",
                   linkActive(pathname, item.href)
                     ? "bg-surface-elevated/95 text-foreground shadow-sm ring-1 ring-white/[0.06]"
                     : "text-muted hover:bg-white/[0.04] hover:text-foreground",
                 )}
               >
+                <Icon
+                  icon={item.icon}
+                  className="size-4 shrink-0 opacity-90"
+                  aria-hidden
+                />
                 {header[item.labelKey]}
               </Link>
             ))}
@@ -91,7 +97,11 @@ export function SiteHeader({ locale, header }: Props) {
           />
           <div className="hidden items-center gap-2 md:flex">
             {status === "loading" ? (
-              <span className="text-sm text-muted" aria-live="polite">
+              <span
+                className="inline-flex items-center gap-2 text-sm text-muted"
+                aria-live="polite"
+              >
+                <Icon icon="mdi:progress-clock" className="size-4" aria-hidden />
                 {header.signingIn}
               </span>
             ) : session ? (
@@ -99,18 +109,24 @@ export function SiteHeader({ locale, header }: Props) {
                 <Link
                   href="/dashboard"
                   className={cn(
-                    "motion-safe:transition rounded-full border border-red-500/25 bg-red-950/35 px-4 py-2 text-sm font-semibold text-foreground shadow-[0_0_28px_-10px_rgba(220,38,38,0.45)] hover:border-red-400/35 hover:bg-red-950/50",
+                    "motion-safe:transition inline-flex items-center gap-2 rounded-full border border-red-500/25 bg-red-950/35 px-4 py-2 text-sm font-semibold text-foreground shadow-[0_0_28px_-10px_rgba(220,38,38,0.45)] hover:border-red-400/35 hover:bg-red-950/50",
                     linkActive(pathname, "/dashboard") &&
                       "border-red-400/40 bg-red-950/55",
                   )}
                 >
+                  <Icon
+                    icon="mdi:view-dashboard-outline"
+                    className="size-4"
+                    aria-hidden
+                  />
                   {header.dashboard}
                 </Link>
                 <button
                   type="button"
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="motion-safe:transition rounded-full px-3 py-2 text-sm text-muted hover:bg-surface hover:text-foreground"
+                  className="motion-safe:transition inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted hover:bg-surface hover:text-foreground"
                 >
+                  <Icon icon="mdi:logout" className="size-4" aria-hidden />
                   {header.signOut}
                 </button>
               </>
@@ -118,8 +134,9 @@ export function SiteHeader({ locale, header }: Props) {
               <button
                 type="button"
                 onClick={() => signIn("discord", { callbackUrl: "/dashboard" })}
-                className="motion-safe:transition rounded-full border border-red-500/25 bg-red-950/35 px-4 py-2 text-sm font-semibold text-foreground shadow-[0_0_28px_-10px_rgba(220,38,38,0.45)] hover:border-red-400/35 hover:bg-red-950/50"
+                className="motion-safe:transition inline-flex items-center gap-2 rounded-full border border-red-500/25 bg-red-950/35 px-4 py-2 text-sm font-semibold text-foreground shadow-[0_0_28px_-10px_rgba(220,38,38,0.45)] hover:border-red-400/35 hover:bg-red-950/50"
               >
+                <Icon icon="mdi:login" className="size-4" aria-hidden />
                 {header.signIn}
               </button>
             )}
@@ -164,18 +181,23 @@ export function SiteHeader({ locale, header }: Props) {
               href={item.href}
               onClick={closeMenu}
               className={cn(
-                "motion-safe:transition rounded-xl px-3 py-3 text-sm font-medium",
+                "motion-safe:transition flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium",
                 linkActive(pathname, item.href)
                   ? "bg-surface-elevated text-foreground ring-1 ring-red-500/15"
                   : "text-muted hover:bg-surface hover:text-foreground",
               )}
             >
+              <Icon icon={item.icon} className="size-5 shrink-0 opacity-90" aria-hidden />
               {header[item.labelKey]}
             </Link>
           ))}
           <hr className="my-2 border-surface-border" />
           {status === "loading" ? (
-            <span className="px-3 py-2 text-sm text-muted" aria-live="polite">
+            <span
+              className="flex items-center gap-2 px-3 py-2 text-sm text-muted"
+              aria-live="polite"
+            >
+              <Icon icon="mdi:progress-clock" className="size-4" aria-hidden />
               {header.signingIn}
             </span>
           ) : session ? (
@@ -184,12 +206,17 @@ export function SiteHeader({ locale, header }: Props) {
                 href="/dashboard"
                 onClick={closeMenu}
                 className={cn(
-                  "motion-safe:transition rounded-xl px-3 py-3 text-sm font-semibold",
+                  "motion-safe:transition flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold",
                   linkActive(pathname, "/dashboard")
                     ? "bg-red-950/40 text-foreground"
                     : "text-muted hover:bg-surface hover:text-foreground",
                 )}
               >
+                <Icon
+                  icon="mdi:view-dashboard-outline"
+                  className="size-5 shrink-0"
+                  aria-hidden
+                />
                 {header.dashboard}
               </Link>
               <button
@@ -198,8 +225,9 @@ export function SiteHeader({ locale, header }: Props) {
                   closeMenu();
                   void signOut({ callbackUrl: "/" });
                 }}
-                className="motion-safe:transition rounded-xl px-3 py-3 text-left text-sm text-muted hover:bg-surface hover:text-foreground"
+                className="motion-safe:transition flex items-center gap-3 rounded-xl px-3 py-3 text-left text-sm text-muted hover:bg-surface hover:text-foreground"
               >
+                <Icon icon="mdi:logout" className="size-5 shrink-0" aria-hidden />
                 {header.signOut}
               </button>
             </>
@@ -210,8 +238,9 @@ export function SiteHeader({ locale, header }: Props) {
                 closeMenu();
                 void signIn("discord", { callbackUrl: "/dashboard" });
               }}
-              className="motion-safe:transition rounded-xl px-3 py-3 text-left text-sm font-semibold text-foreground hover:bg-surface"
+              className="motion-safe:transition flex items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold text-foreground hover:bg-surface"
             >
+              <Icon icon="mdi:discord" className="size-5 shrink-0" aria-hidden />
               {header.signInDiscord}
             </button>
           )}

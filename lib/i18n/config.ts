@@ -8,8 +8,8 @@ export const defaultLocale: Locale = "en";
 export const localeLabels: Record<
   Locale,
   {
-    /** Unicode regional flag / flag emoji for compact UI */
-    flag: string;
+    /** Iconify icon id (`circle-flags:*`) */
+    flagIcon: string;
     /** Primary label (often native name) */
     label: string;
     /** Region in English, parentheses in UI */
@@ -18,10 +18,15 @@ export const localeLabels: Record<
     htmlLang: string;
   }
 > = {
-  en: { flag: "🇺🇸", label: "English", region: "US", htmlLang: "en" },
-  de: { flag: "🇩🇪", label: "Deutsch", region: "Deutschland", htmlLang: "de" },
-  ja: { flag: "🇯🇵", label: "日本語", region: "Japan", htmlLang: "ja" },
-  ko: { flag: "🇰🇷", label: "한국어", region: "Korea", htmlLang: "ko" },
+  en: { flagIcon: "circle-flags:us", label: "English", region: "US", htmlLang: "en" },
+  de: {
+    flagIcon: "circle-flags:de",
+    label: "Deutsch",
+    region: "Deutschland",
+    htmlLang: "de",
+  },
+  ja: { flagIcon: "circle-flags:jp", label: "日本語", region: "Japan", htmlLang: "ja" },
+  ko: { flagIcon: "circle-flags:kr", label: "한국어", region: "Korea", htmlLang: "ko" },
 };
 
 export function isLocale(v: string): v is Locale {

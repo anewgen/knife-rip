@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { API } from "@/lib/safe-api-message";
 import { getStripe } from "@/lib/stripe";
 import { syncKnifeRipDiscordRolesForUserId } from "@/lib/sync-knife-privilege-roles";
 import { NextResponse } from "next/server";
@@ -7,10 +8,7 @@ import Stripe from "stripe";
 export async function POST(req: Request) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!secret) {
-    return NextResponse.json(
-      { error: "STRIPE_WEBHOOK_SECRET not configured" },
-      { status: 500 },
-    );
+    return NextResponse.json(API.unavailable, { status: 503 });
   }
 
   const body = await req.text();
@@ -87,9 +85,9 @@ export async function POST(req: Request) {
       default:
         break;
     }
-  } catch (e) {
-    console.error("Stripe webhook handler error", e);
-    return NextResponse.json({ error: "Handler failed" }, { status: 500 });
+  } catch {
+    console.error("[stripe webhook] handler failed");
+    return NextResponse.json(API.unavailable, { status: 500 });
   }
 
   return NextResponse.json({ received: true });

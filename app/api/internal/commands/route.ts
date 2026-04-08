@@ -1,5 +1,6 @@
 import { COMMAND_CATALOG_VERSION, COMMAND_SNAPSHOT_ID } from "@/lib/commands";
 import { db } from "@/lib/db";
+import { API } from "@/lib/safe-api-message";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -71,10 +72,7 @@ function isValidCatalog(body: unknown): body is {
 export async function POST(req: NextRequest) {
   const expected = process.env.BOT_INTERNAL_SECRET;
   if (!expected) {
-    return NextResponse.json(
-      { error: "BOT_INTERNAL_SECRET not configured" },
-      { status: 503 },
-    );
+    return NextResponse.json(API.unavailable, { status: 503 });
   }
 
   const auth = req.headers.get("authorization");
@@ -92,23 +90,18 @@ export async function POST(req: NextRequest) {
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json(API.badRequest, { status: 400 });
   }
 
   if (!isValidCatalog(body)) {
-    return NextResponse.json(
-      { error: "Invalid command catalog payload" },
-      { status: 400 },
-    );
+    return NextResponse.json(API.badRequest, { status: 400 });
   }
 
   if (body.version !== COMMAND_CATALOG_VERSION) {
-    return NextResponse.json(
-      {
-        error: `Unsupported catalog version (expected ${COMMAND_CATALOG_VERSION})`,
-      },
-      { status: 400 },
+    console.warn(
+      `[commands sync] catalog version mismatch (site expects ${COMMAND_CATALOG_VERSION})`,
     );
+    return NextResponse.json(API.badRequest, { status: 400 });
   }
 
   const payload = {

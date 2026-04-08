@@ -1,4 +1,5 @@
 import { isLocale, LOCALE_COOKIE, type Locale } from "@/lib/i18n/config";
+import { API } from "@/lib/safe-api-message";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -6,11 +7,11 @@ export async function POST(req: Request) {
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json(API.badRequest, { status: 400 });
   }
   const locale = (body as { locale?: string })?.locale;
   if (!locale || !isLocale(locale)) {
-    return NextResponse.json({ error: "Invalid locale" }, { status: 400 });
+    return NextResponse.json(API.badRequest, { status: 400 });
   }
 
   const res = NextResponse.json({ ok: true, locale: locale as Locale });

@@ -1,5 +1,6 @@
 import type { Client, Message, PartialMessage } from "discord.js";
 import { Events } from "discord.js";
+import type { DeleteSnipe } from "./store";
 import {
   recordDeleteSnipe,
   recordEditSnipe,
@@ -16,6 +17,23 @@ async function ensureMessage(m: Message | PartialMessage): Promise<Message | nul
   }
 }
 
+/** File attachments plus stickers (Discord treats stickers separately from `attachments`). */
+function attachmentLikeCount(full: Message): number {
+  return full.attachments.size + full.stickers.size;
+}
+
+function buildDeleteSnipePayload(full: Message): Omit<DeleteSnipe, "kind"> | null {
+  if (full.author?.bot) return null;
+  return {
+    authorId: full.author.id,
+    authorTag: full.author.tag,
+    content: full.content || "*[no text]*",
+    attachmentCount: attachmentLikeCount(full),
+    messageId: full.id,
+    at: Date.now(),
+  };
+}
+
 export function registerSnipeListeners(client: Client): void {
   client.on(Events.MessageDelete, async (message) => {
     try {
@@ -23,16 +41,28 @@ export function registerSnipeListeners(client: Client): void {
       const chId = message.channelId;
       const full = await ensureMessage(message);
       if (!full) return;
-      if (full.author?.bot) return;
+      const payload = buildDeleteSnipePayload(full);
+      if (!payload) return;
 
-      recordDeleteSnipe(chId, {
-        authorId: full.author.id,
-        authorTag: full.author.tag,
-        content: full.content || "*[no text]*",
-        attachmentCount: full.attachments.size,
-        messageId: full.id,
-        at: Date.now(),
-      });
+      recordDeleteSnipe(chId, payload);
+    } catch {
+      /* ignore */
+    }
+  });
+
+  client.on(Events.MessageBulkDelete, async (messages, channel) => {
+    try {
+      const chId = channel.id;
+      const candidates: Omit<DeleteSnipe, "kind">[] = [];
+      for (const msg of messages.values()) {
+        const full = await ensureMessage(msg);
+        if (!full) continue;
+        const payload = buildDeleteSnipePayload(full);
+        if (payload) candidates.push(payload);
+      }
+      if (candidates.length === 0) return;
+      candidates.sort((a, b) => (BigInt(a.messageId) < BigInt(b.messageId) ? 1 : -1));
+      recordDeleteSnipe(chId, candidates[0]);
     } catch {
       /* ignore */
     }

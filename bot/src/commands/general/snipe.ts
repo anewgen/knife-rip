@@ -190,14 +190,14 @@ export const rsnipeCommand: KnifeCommand = {
 
 export const clearsnipeCommand: KnifeCommand = {
   name: "clearsnipe",
-  aliases: ["clearsnipes", "snipeclear", "csnipe"],
+  aliases: ["clearsnipes", "snipeclear", "csnipe", "cs"],
   description:
     "Clear snipe buffers in **this channel** (last delete, edit, reaction removal, and per-message reaction log)",
   site: {
     categoryId: "utility",
     categoryTitle: "Utility",
     categoryDescription: "Snipe and moderation tools.",
-    usage: ".clearsnipe",
+    usage: ".clearsnipe · .cs · .clearsnipes · .csnipe",
     tier: "free",
     style: "prefix",
   },

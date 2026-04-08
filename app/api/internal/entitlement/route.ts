@@ -1,4 +1,5 @@
 import { getEntitlementForDiscordUserId } from "@/lib/entitlement";
+import { API } from "@/lib/safe-api-message";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -6,10 +7,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   const expected = process.env.BOT_INTERNAL_SECRET;
   if (!expected) {
-    return NextResponse.json(
-      { error: "BOT_INTERNAL_SECRET not configured" },
-      { status: 503 },
-    );
+    return NextResponse.json(API.unavailable, { status: 503 });
   }
 
   const auth = req.headers.get("authorization");

@@ -7,6 +7,7 @@ import {
   upsertDiscordPrivilege,
 } from "@/lib/discord-privilege";
 import { syncKnifeRipDiscordRolesForDiscordUser } from "@/lib/sync-knife-privilege-roles";
+import { API } from "@/lib/safe-api-message";
 import { DiscordPrivilegeKind } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -29,10 +30,7 @@ function authFailureResponse(
   req: NextRequest,
 ): NextResponse | null {
   if (!expected) {
-    return NextResponse.json(
-      { error: "BOT_INTERNAL_SECRET not configured" },
-      { status: 503 },
-    );
+    return NextResponse.json(API.unavailable, { status: 503 });
   }
   const auth = req.headers.get("authorization");
   const token = auth?.startsWith("Bearer ") ? auth.slice(7) : null;

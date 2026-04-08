@@ -173,6 +173,113 @@ export function applyKnifeEmbedPlaceholders(
   return out;
 }
 
+/** Sample context for the site embed builder (live preview placeholder expansion). */
+export const KNIFE_EMBED_DEMO_CONTEXT: KnifeEmbedPlaceholderContext = {
+  user: {
+    id: "309630495930818560",
+    username: "nightblade",
+    globalName: "Alex",
+    tag: "nightblade",
+    bot: false,
+    createdTimestamp: Date.now() - 86400 * 380 * 1000,
+    avatarUrl: "https://cdn.discordapp.com/embed/avatars/1.png",
+    bannerUrl: null,
+  },
+  member: {
+    id: "309630495930818560",
+    displayName: "Alex",
+    nickname: "Alex • Mod",
+    joinedTimestamp: Date.now() - 86400 * 120 * 1000,
+    roles: "<@&111111111111111111> <@&222222222222222222>",
+    roleCount: 7,
+    avatarUrl: "https://cdn.discordapp.com/embed/avatars/1.png",
+  },
+  guild: {
+    id: "1490477452726894693",
+    name: "Knife Lounge",
+    iconUrl:
+      "https://cdn.discordapp.com/embed/avatars/3.png",
+    memberCount: 12847,
+    ownerId: "999999999999999999",
+    createdTimestamp: Date.now() - 86400 * 900 * 1000,
+    premiumTier: 2,
+    premiumSubscriptionCount: 14,
+  },
+  channel: {
+    id: "1158878901234567890",
+    name: "moderation-logs",
+    topic: "Staff actions only",
+    isThread: false,
+    parentId: null,
+    createdTimestamp: Date.now() - 86400 * 400 * 1000,
+  },
+  message: {
+    id: "1234567890123456789",
+    content: "Please review this case.",
+    createdTimestamp: Date.now() - 3600_000,
+    url: "https://discord.com/channels/1490477452726894693/1158878901234567890/1234567890123456789",
+  },
+};
+
+export function applyPlaceholdersToParsedEmbed(
+  embed: KnifeParsedEmbed,
+  ctx: KnifeEmbedPlaceholderContext,
+): KnifeParsedEmbed {
+  const ap = (s?: string) =>
+    s === undefined || s === "" ? s : applyKnifeEmbedPlaceholders(s, ctx);
+
+  const out: KnifeParsedEmbed = {
+    ...embed,
+    title: ap(embed.title),
+    description: ap(embed.description),
+    url: ap(embed.url),
+  };
+
+  if (embed.author) {
+    const name = ap(embed.author.name) ?? "";
+    const icon_url = ap(embed.author.icon_url);
+    const urlA = ap(embed.author.url);
+    if (name.trim() || icon_url) {
+      out.author = {
+        name: name.trim() || (icon_url ? "·" : ""),
+        url: urlA,
+        icon_url,
+      };
+    } else {
+      out.author = undefined;
+    }
+  }
+
+  if (embed.footer) {
+    const text = ap(embed.footer.text) ?? "";
+    const icon_url = ap(embed.footer.icon_url);
+    if (text.trim()) {
+      out.footer = { text, icon_url };
+    } else {
+      out.footer = undefined;
+    }
+  }
+
+  if (embed.fields?.length) {
+    out.fields = embed.fields.map((f) => ({
+      ...f,
+      name: ap(f.name) ?? "",
+      value: ap(f.value) ?? "",
+    }));
+  }
+
+  if (embed.thumbnail?.url) {
+    const u = ap(embed.thumbnail.url);
+    out.thumbnail = u?.trim() ? { url: u } : undefined;
+  }
+  if (embed.image?.url) {
+    const u = ap(embed.image.url);
+    out.image = u?.trim() ? { url: u } : undefined;
+  }
+
+  return out;
+}
+
 export function splitKnifeEmbedScript(raw: string): {
   content: string;
   embedSegment: string | null;

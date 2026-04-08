@@ -1,6 +1,7 @@
 import { KnifeEmbedBuilder } from "@/components/embed-builder/knife-embed-builder";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import { ButtonLink } from "@/components/ui/button-link";
+import { Icon } from "@/components/ui/icon";
 import { siteMetadataBase } from "@/lib/site-url";
 import type { Metadata } from "next";
 
@@ -26,7 +27,12 @@ export default function EmbedBuilderPage() {
           className="mb-4 block h-1 w-10 rounded-full bg-gradient-to-r from-edge/70 via-edge/30 to-transparent"
           aria-hidden
         />
-        <h1 className="font-display text-4xl font-bold tracking-tight text-accent-strong sm:text-5xl">
+        <h1 className="flex flex-wrap items-center gap-3 font-display text-4xl font-bold tracking-tight text-accent-strong sm:text-5xl">
+          <Icon
+            icon="mdi:widgets-outline"
+            className="size-10 shrink-0 text-edge sm:size-12"
+            aria-hidden
+          />
           Embed builder
         </h1>
         <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted">
@@ -39,14 +45,23 @@ export default function EmbedBuilderPage() {
           <code className="font-mono text-sm text-accent-strong">
             .createembed
           </code>
-          . Variables expand when the bot sends the message (same context as the
-          staff member running the command). Webhook JSON still works too.
+          . The live panel mirrors Discord as you type — toggle{" "}
+          <strong className="font-semibold text-foreground/90">sample data</strong>{" "}
+          to see how variables resolve. Webhook JSON still works too.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <ButtonLink href="/commands" variant="secondary">
-            Commands
+            <span className="inline-flex items-center gap-2">
+              <Icon icon="mdi:console" className="size-4" aria-hidden />
+              Commands
+            </span>
           </ButtonLink>
-          <ButtonLink href="/docs">Docs</ButtonLink>
+          <ButtonLink href="/docs">
+            <span className="inline-flex items-center gap-2">
+              <Icon icon="mdi:book-open-variant" className="size-4" aria-hidden />
+              Docs
+            </span>
+          </ButtonLink>
         </div>
       </ScrollReveal>
 

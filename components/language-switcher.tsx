@@ -25,6 +25,7 @@ export function LanguageSwitcher({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
+  const [saveFailed, setSaveFailed] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
   const current = localeLabels[locale];
@@ -52,6 +53,7 @@ export function LanguageSwitcher({
       close();
       return;
     }
+    setSaveFailed(false);
     setPending(true);
     try {
       const res = await fetch("/api/locale", {
@@ -62,7 +64,11 @@ export function LanguageSwitcher({
       if (res.ok) {
         close();
         router.refresh();
+      } else {
+        setSaveFailed(true);
       }
+    } catch {
+      setSaveFailed(true);
     } finally {
       setPending(false);
     }
@@ -84,11 +90,16 @@ export function LanguageSwitcher({
           pending && "opacity-60",
         )}
       >
+        <Icon
+          icon="mdi:translate"
+          className="hidden size-4 shrink-0 text-muted sm:block"
+          aria-hidden
+        />
         <span
-          className="flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/[0.06] text-base leading-none"
+          className="flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/[0.06] ring-1 ring-white/[0.08]"
           aria-hidden
         >
-          {current.flag}
+          <Icon icon={current.flagIcon} className="size-7" aria-hidden />
         </span>
         <span className="hidden min-w-0 sm:inline">
           <span className="font-semibold text-foreground">{current.label}</span>
@@ -107,6 +118,11 @@ export function LanguageSwitcher({
           role="listbox"
           aria-label={selectLanguageLabel}
         >
+          {saveFailed ? (
+            <p className="mx-3 mb-1 rounded-lg border border-red-500/25 bg-red-950/35 px-2.5 py-2 text-[11px] leading-snug text-muted">
+              Couldn&apos;t save language. Check your connection and try again.
+            </p>
+          ) : null}
           {locales.map((code) => {
             const row = localeLabels[code];
             const active = code === locale;
@@ -127,10 +143,10 @@ export function LanguageSwitcher({
                 )}
               >
                 <span
-                  className="flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/[0.06] text-base leading-none"
+                  className="flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/[0.06] ring-1 ring-white/[0.08]"
                   aria-hidden
                 >
-                  {row.flag}
+                  <Icon icon={row.flagIcon} className="size-7" aria-hidden />
                 </span>
                 <span className="min-w-0">
                   <span className="font-semibold text-foreground">

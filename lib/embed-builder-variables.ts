@@ -15,11 +15,14 @@ export type EmbedVariableItem = {
 export const EMBED_VARIABLE_CATEGORIES: {
   id: EmbedVariableCategoryId;
   label: string;
+  /** Iconify icon id (bundled mdi / tabler) */
+  icon: string;
   items: EmbedVariableItem[];
 }[] = [
   {
     id: "user",
     label: "User",
+    icon: "mdi:account-circle-outline",
     items: [
       { key: "{user}", description: "User display name" },
       { key: "{user.id}", description: "User ID" },
@@ -39,6 +42,7 @@ export const EMBED_VARIABLE_CATEGORIES: {
   {
     id: "member",
     label: "Member",
+    icon: "mdi:account-group-outline",
     items: [
       { key: "{member}", description: "Member display name" },
       { key: "{member.id}", description: "Member ID" },
@@ -58,6 +62,7 @@ export const EMBED_VARIABLE_CATEGORIES: {
   {
     id: "server",
     label: "Server",
+    icon: "mdi:server",
     items: [
       { key: "{guild.name}", description: "Server name" },
       { key: "{guild.id}", description: "Server ID" },
@@ -74,6 +79,7 @@ export const EMBED_VARIABLE_CATEGORIES: {
   {
     id: "channel",
     label: "Channel",
+    icon: "mdi:pound",
     items: [
       { key: "{channel.name}", description: "Channel name" },
       { key: "{channel.id}", description: "Channel ID" },
@@ -87,6 +93,7 @@ export const EMBED_VARIABLE_CATEGORIES: {
   {
     id: "role",
     label: "Role",
+    icon: "mdi:shield-account-outline",
     items: [
       { key: "{role.id}", description: "Context role ID (future)" },
       { key: "{role.name}", description: "Context role name (future)" },
@@ -98,6 +105,7 @@ export const EMBED_VARIABLE_CATEGORIES: {
   {
     id: "message",
     label: "Message",
+    icon: "mdi:message-text-outline",
     items: [
       { key: "{message.id}", description: "Message ID" },
       { key: "{message.url}", description: "Message URL" },
@@ -108,6 +116,7 @@ export const EMBED_VARIABLE_CATEGORIES: {
   {
     id: "special",
     label: "Special",
+    icon: "mdi:star-four-points-outline",
     items: [
       { key: "{timestamp}", description: "ISO timestamp (send time)" },
       { key: "$v", description: "New line inside a `{key: …}` value" },

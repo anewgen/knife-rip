@@ -39,6 +39,7 @@ export default async function DashboardPage({
   const sp = searchParams ? await searchParams : {};
   const checkout = firstQuery(sp.checkout);
   const pro = firstQuery(sp.pro);
+  const billing = firstQuery(sp.billing);
 
   const session = await auth();
   if (!session?.user?.id) return null;
@@ -98,9 +99,33 @@ export default async function DashboardPage({
   const showCheckoutPending =
     checkout === "success" && !premiumActive;
   const showAlreadyPro = pro === "already";
+  const showBillingError = billing === "error";
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-10 px-4 py-12 sm:px-6">
+      {showBillingError ? (
+        <ScrollReveal
+          as="div"
+          role="alert"
+          className="rounded-xl border border-red-500/30 bg-red-950/25 px-4 py-3 text-sm text-foreground/95"
+          amount={0.12}
+        >
+          <p className="font-medium text-accent-strong">
+            Billing portal unavailable
+          </p>
+          <p className="mt-1 text-muted">
+            Stripe could not open just now. Try again in a few minutes or email{" "}
+            <a
+              href="mailto:support@knife.rip"
+              className="font-medium text-edge underline-offset-2 hover:underline"
+            >
+              support@knife.rip
+            </a>
+            .
+          </p>
+        </ScrollReveal>
+      ) : null}
+
       {showAlreadyPro ? (
         <ScrollReveal
           as="div"
