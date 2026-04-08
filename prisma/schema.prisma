@@ -701,3 +701,24 @@ model BotBtcTxWatch {
   @@unique([userId, txHash])
   @@index([txHash])
 }
+
+/// Dictionary-driven invite slug observation (GET invite by code, same as discord.gg links).
+model VanityInviteObservation {
+  code             String    @id
+  wasValid         Boolean   @default(false)
+  guildId          String?
+  guildName        String?
+  lastCheckedAt    DateTime  @default(now())
+  firstSeenValidAt DateTime?
+  /// Set when `wasValid` transitions true → false (invite stopped resolving).
+  droppedAt        DateTime?
+
+  @@index([droppedAt])
+}
+
+/// Single-row cursor into the filtered vanity word list (singleton id = 1).
+model VanityScannerCheckpoint {
+  id        Int      @id
+  nextIndex Int      @default(0)
+  updatedAt DateTime @updatedAt
+}

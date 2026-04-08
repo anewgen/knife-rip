@@ -1,16 +1,11 @@
 import { randomBytes } from "node:crypto";
 import type { Client } from "discord.js";
 
-import { isKnifePremium } from "../../../../lib/knife-premium";
-import { getBotInternalSecret } from "../../config";
-import { isCommandOwnerBypass } from "../owner-bypass";
-import { fetchEntitlementFromSite } from "../site-client";
+import { userCanUseKnifeProFeatures } from "../pro-entitlement";
 import {
   describeDuration,
   parseModerationDuration,
 } from "../moderation-duration";
-
-const PRICING_URL = "https://knife.rip/pricing";
 
 /** Cap how far ahead a Pro user can schedule */
 export const MAX_REMIND_DELAY_MS = 7 * 24 * 60 * 60 * 1000;
@@ -37,30 +32,7 @@ export async function userCanUseRemind(userId: string): Promise<{
   ok: boolean;
   reason?: string;
 }> {
-  if (await isCommandOwnerBypass(userId)) return { ok: true };
-  if (isKnifePremium(userId)) return { ok: true };
-
-  if (!getBotInternalSecret()) {
-    return {
-      ok: false,
-      reason:
-        "Knife Pro isn’t linked on this bot (**BOT_INTERNAL_SECRET** missing).",
-    };
-  }
-
-  try {
-    const e = await fetchEntitlementFromSite(userId);
-    if (e.premium || e.developer || e.owner) return { ok: true };
-    return {
-      ok: false,
-      reason: `**.remind** is **Knife Pro** only.\n**[Pricing](${PRICING_URL})**`,
-    };
-  } catch {
-    return {
-      ok: false,
-      reason: "Could not verify Pro status. Try again shortly.",
-    };
-  }
+  return userCanUseKnifeProFeatures(userId, { commandLabel: ".remind" });
 }
 
 export function parseRemindDelay(raw: string): number | null {

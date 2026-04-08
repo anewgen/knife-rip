@@ -35,6 +35,24 @@ export function formatChangelogDateEst(isoDate: string): string {
 
 export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   {
+    id: "2026-04-08-v40-vanity-slash",
+    catalogVersion: 40,
+    date: "2026-04-08",
+    title: "Vanity: /vanities slash command",
+    summary:
+      "Knife Pro vanity scanner is available as slash /vanities with subcommands drop and search, in addition to prefix .vanity. Re-invite the bot with the applications.commands scope if the command does not appear.",
+    bullets: [],
+  },
+  {
+    id: "2026-04-08-v39-vanity-pro",
+    catalogVersion: 39,
+    date: "2026-04-08",
+    title: "Knife Pro: vanity slug search and recent drops",
+    summary:
+      "Prefix .vanity search looks up a discord.gg slug via Discord. .vanity drop or .vanities lists recent dictionary-driven invite releases with pagination like other vanity bots. A background scanner runs when VANITY_SCANNER_ENABLED=1; apply migration 20260408160000_vanity_invite_observation.",
+    bullets: [],
+  },
+  {
     id: "2026-04-18-v38-command-aliases",
     catalogVersion: 38,
     date: "2026-04-18",

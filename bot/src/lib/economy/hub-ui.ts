@@ -185,7 +185,8 @@ export async function buildGambleHubPayload(params: {
       }
       const select = new StringSelectMenuBuilder()
         .setCustomId(btnId(userId, "pg", String(p), "shop", "sel"))
-        .setPlaceholder(`${ecoM.shop} Choose an item to buy…`)
+        // Placeholders are plain text—`<:name:id>` does not render as an emoji here.
+        .setPlaceholder("🛒 Choose an item to buy…")
         .addOptions(
           items.map((it) => {
             const price =

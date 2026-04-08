@@ -72,6 +72,7 @@ import { ttsCommand } from "./general/tts";
 import { urbandictionaryCommand } from "./general/urbandictionary";
 import { uptimeCommand } from "./general/uptime";
 import { userinfoCommand } from "./general/userinfo";
+import { vanityCommand } from "./general/vanity";
 import { voicemasterCommand } from "./general/voicemaster";
 import { weatherCommand } from "./general/weather";
 import { webhookCommand } from "./utility/webhook";
@@ -274,6 +275,7 @@ export const commandDefinitions: KnifeCommand[] = [
   unlockCommand,
   uptimeCommand,
   userinfoCommand,
+  vanityCommand,
   weatherCommand,
   vlbCommand,
   warnCommand,

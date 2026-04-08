@@ -9,13 +9,7 @@ import {
   EMBED_VARIABLE_CATEGORIES,
   type EmbedVariableCategoryId,
 } from "@/lib/embed-builder-variables";
-import {
-  applyKnifeEmbedPlaceholders,
-  applyPlaceholdersToParsedEmbed,
-  KNIFE_EMBED_DEMO_CONTEXT,
-  serializeKnifeEmbedScript,
-  type KnifeParsedEmbed,
-} from "@/lib/embed-script";
+import { serializeKnifeEmbedScript, type KnifeParsedEmbed } from "@/lib/embed-script";
 import { LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import { useMemo, useState } from "react";
 
@@ -124,7 +118,6 @@ export function KnifeEmbedBuilder() {
   const [fields, setFields] = useState<FieldRow[]>([]);
   const [varCat, setVarCat] = useState<EmbedVariableCategoryId>("user");
   const [copied, setCopied] = useState<string | null>(null);
-  const [resolveSamples, setResolveSamples] = useState(true);
 
   const formState = useMemo(
     () => ({
@@ -163,24 +156,12 @@ export function KnifeEmbedBuilder() {
 
   const previewEmbed = useMemo(() => toPreviewApiEmbed(formState), [formState]);
 
-  const displayEmbed = useMemo(
-    () =>
-      resolveSamples
-        ? applyPlaceholdersToParsedEmbed(
-            previewEmbed,
-            KNIFE_EMBED_DEMO_CONTEXT,
-          )
-        : previewEmbed,
-    [previewEmbed, resolveSamples],
-  );
+  const displayEmbed = previewEmbed;
 
   const displayMessage = useMemo(() => {
     const raw = messageContent.trim();
-    if (!raw) return "";
-    return resolveSamples
-      ? applyKnifeEmbedPlaceholders(raw, KNIFE_EMBED_DEMO_CONTEXT)
-      : raw;
-  }, [messageContent, resolveSamples]);
+    return raw;
+  }, [messageContent]);
 
   const generated = useMemo(
     () =>
@@ -239,48 +220,6 @@ export function KnifeEmbedBuilder() {
     ]);
   };
 
-  const loadStarterTemplate = () => {
-    setMessageContent(
-      "Moderation — case review for {user} in #{channel.name}.\n\nUse buttons below to resolve.",
-    );
-    setTitle("Case · {user}");
-    setDescription(
-      "Staff {member} is reviewing this report.\n\n• Guild: {guild.name} ({guild.count} members)\n• Channel: #{channel.name}",
-    );
-    setUrl("https://knife.rip/docs");
-    setColor("#ef4444");
-    setThumbnail("https://cdn.discordapp.com/embed/avatars/2.png");
-    setImage("");
-    setTimestamp(true);
-    setAuthorName("{guild.name} · Staff");
-    setAuthorUrl("https://knife.rip");
-    setAuthorIconUrl("{guild.icon}");
-    setFooterText("Knife • {guild.name}");
-    setFooterIconUrl("");
-    setFields([
-      {
-        id: randomId(),
-        name: "Reporter",
-        value: "{member}",
-        inline: true,
-      },
-      {
-        id: randomId(),
-        name: "Severity",
-        value: "Medium",
-        inline: true,
-      },
-      {
-        id: randomId(),
-        name: "Notes",
-        value: "Use Sample data in the panel to resolve placeholders in preview.",
-        inline: false,
-      },
-    ]);
-    setResolveSamples(true);
-    setTab("general");
-  };
-
   const clearAll = () => {
     setMessageContent("");
     setTitle("");
@@ -330,31 +269,8 @@ export function KnifeEmbedBuilder() {
                   />
                   Compose
                 </h2>
-                <p className="mt-1 max-w-xl text-sm text-muted">
-                  Live preview updates as you type. Paste into{" "}
-                  <code className="rounded bg-background/80 px-1 font-mono text-xs text-edge">
-                    .say
-                  </code>{" "}
-                  or{" "}
-                  <code className="rounded bg-background/80 px-1 font-mono text-xs text-edge">
-                    .createembed
-                  </code>
-                  .
-                </p>
               </div>
               <div className="flex flex-wrap items-center gap-2 sm:max-w-[min(100%,22rem)] sm:justify-end">
-                <motion.button
-                  type="button"
-                  whileTap={reduce ? undefined : { scale: 0.97 }}
-                  onClick={loadStarterTemplate}
-                  className={cn(
-                    actionBtn,
-                    "border border-white/[0.12] bg-background/50 text-foreground hover:border-edge/35 hover:bg-surface-elevated",
-                  )}
-                >
-                  <Icon icon="mdi:flare" className="size-4 text-edge" aria-hidden />
-                  Try sample
-                </motion.button>
                 <motion.button
                   type="button"
                   whileTap={reduce ? undefined : { scale: 0.97 }}
@@ -841,50 +757,15 @@ export function KnifeEmbedBuilder() {
       <div className="min-w-0 space-y-6 xl:col-span-5 2xl:col-span-4">
         <div className="xl:sticky xl:top-[4.5rem] xl:z-10 xl:space-y-6">
           <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-              <div className="flex min-w-0 items-center gap-2">
-                <Icon
-                  icon="mdi:eye-outline"
-                  className="size-5 shrink-0 text-edge"
-                  aria-hidden
-                />
-                <h3 className="font-display text-sm font-bold tracking-tight text-accent-strong">
-                  Live preview
-                </h3>
-              </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={resolveSamples}
-                aria-label={
-                  resolveSamples
-                    ? "Showing sample placeholder data"
-                    : "Showing raw placeholders"
-                }
-                onClick={() => setResolveSamples((v) => !v)}
-                className={cn(
-                  "inline-flex h-9 shrink-0 items-center gap-2 self-start rounded-full border px-3.5 text-xs font-semibold motion-safe:transition sm:self-auto",
-                  resolveSamples
-                    ? "border-edge/40 bg-red-950/40 text-foreground"
-                    : "border-white/[0.1] bg-background/60 text-muted",
-                )}
-              >
-                <Icon
-                  icon={
-                    resolveSamples ? "mdi:flask-outline" : "mdi:code-braces-box"
-                  }
-                  className="size-4 shrink-0 opacity-90"
-                  aria-hidden
-                />
-                <span
-                  className={cn(
-                    "pointer-events-none size-2 rounded-full motion-safe:transition",
-                    resolveSamples ? "bg-edge shadow-[0_0_8px_rgba(248,113,113,0.6)]" : "bg-muted",
-                  )}
-                  aria-hidden
-                />
-                {resolveSamples ? "Sample data" : "Raw tokens"}
-              </button>
+            <div className="flex min-w-0 items-center gap-2">
+              <Icon
+                icon="mdi:eye-outline"
+                className="size-5 shrink-0 text-edge"
+                aria-hidden
+              />
+              <h3 className="font-display text-sm font-bold tracking-tight text-accent-strong">
+                Live preview
+              </h3>
             </div>
             <EmbedBuilderLivePreview
               messageContent={displayMessage}
@@ -902,15 +783,12 @@ export function KnifeEmbedBuilder() {
                   aria-hidden
                 />
                 <span>
-                  <strong className="font-semibold text-foreground/85">
-                    Sample data
-                  </strong>{" "}
-                  replaces tokens like{" "}
+                  Tokens like{" "}
                   <code className="rounded bg-surface-elevated px-1 font-mono text-[10px] text-edge">
                     {"{user}"}
                   </code>{" "}
-                  with demo guild values here. In Discord, the bot uses the real
-                  command context.
+                  appear as written in this preview. In Discord, the bot fills
+                  them from the real command context.
                 </span>
               </span>
             </div>

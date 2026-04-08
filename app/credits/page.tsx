@@ -33,7 +33,7 @@ const CREDIT_MEMBERS: CreditMember[] = [
     name: "Poser",
     role: "Contributor",
     roleIcon: "mdi:star-outline",
-    avatar: "/showcase/ak.png",
+    avatar: "/team/poser.png",
     accent: "#a855f7",
     bio: "Contributor on Knife projects and community initiatives.",
     badges: ["mdi:guitar-electric", "mdi:star-circle-outline"],

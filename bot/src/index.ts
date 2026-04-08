@@ -50,6 +50,16 @@ import {
   handleReactionRoleRemove,
 } from "./lib/reaction-role-events";
 import { syncStatusToSite } from "./lib/status-sync";
+import { handleVanityButton } from "./lib/vanity/interaction-handler";
+import {
+  isVanityScannerEnabled,
+  tickVanityScanner,
+  vanityScannerTickPeriodMs,
+} from "./lib/vanity/scanner";
+import {
+  handleVanitySlashCommand,
+  registerVanitySlashCommands,
+} from "./lib/vanity/slash";
 
 acquireSingleInstanceLock();
 
@@ -75,6 +85,7 @@ const PRIVILEGE_RECONCILE_MS = 20 * 60 * 1000;
 
 client.once(Events.ClientReady, async (c) => {
   console.log(`Knife ready as ${c.user.tag} — prefix "${PREFIX}"`);
+  void registerVanitySlashCommands(c);
   try {
     await loadEconomyGuildEnvConfig();
     console.log("Economy env (shop + partner guilds for boost) loaded.");
@@ -153,6 +164,25 @@ client.once(Events.ClientReady, async (c) => {
       console.warn("Status snapshot sync failed:", err),
     );
   }, 60_000);
+
+  if (isVanityScannerEnabled()) {
+    const vanityMs = vanityScannerTickPeriodMs();
+    console.log(
+      `Vanity invite scanner: on — batch every ~${Math.round(vanityMs / 1000)}s (set VANITY_SCANNER_* to tune).`,
+    );
+    setInterval(() => {
+      tickVanityScanner(c).catch((err) =>
+        console.warn("Vanity scanner tick failed:", err),
+      );
+    }, vanityMs);
+    tickVanityScanner(c).catch((err) =>
+      console.warn("Vanity scanner initial tick failed:", err),
+    );
+  } else {
+    console.log(
+      "Vanity invite scanner: off — set VANITY_SCANNER_ENABLED=1 to probe dictionary slugs.",
+    );
+  }
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
@@ -162,7 +192,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
   ) {
     return;
   }
+  if (interaction.isChatInputCommand()) {
+    const slashVanity = await handleVanitySlashCommand(interaction);
+    if (slashVanity) return;
+  }
   if (interaction.isButton()) {
+    const vanityHandled = await handleVanityButton(interaction);
+    if (vanityHandled) return;
     const handled = await handleButtonRoleInteraction(interaction);
     if (handled) return;
   }
