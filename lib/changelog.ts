@@ -35,6 +35,15 @@ export function formatChangelogDateEst(isoDate: string): string {
 
 export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   {
+    id: "2026-04-08-docs-overhaul",
+    catalogVersion: 40,
+    date: "2026-04-08",
+    title: "Documentation hub refresh",
+    summary:
+      "The docs section is now a full guide hub with sidebar navigation, Command+K search, mobile drawer, sticky table of contents, and themed motion. Articles cover Knife features honestly (including not-yet features) with deep links across commands, embed builder, and dashboard.",
+    bullets: [],
+  },
+  {
     id: "2026-04-08-v40-vanity-slash",
     catalogVersion: 40,
     date: "2026-04-08",

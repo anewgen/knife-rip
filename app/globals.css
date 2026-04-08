@@ -599,6 +599,11 @@ body {
   color: var(--accent-strong);
 }
 
+.prose-docs kbd {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
+}
+
 /* ── Site-wide custom scrollbars (Firefox + WebKit) ─────────────────────── */
 * {
   scrollbar-width: thin;
