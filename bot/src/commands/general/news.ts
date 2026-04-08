@@ -7,6 +7,8 @@ type LatestPayload = {
   summary: string;
   url: string;
   date?: string;
+  /** Pre-formatted release date (US Eastern), from the site API when available. */
+  dateDisplay?: string;
   catalogVersion?: number;
 };
 
@@ -60,7 +62,8 @@ export const newsCommand: KnifeCommand = {
       return;
     }
 
-    const datePart = payload.date ? ` · ${payload.date}` : "";
+    const dateShown = payload.dateDisplay ?? payload.date;
+    const datePart = dateShown ? ` · ${dateShown}` : "";
     const cat =
       payload.catalogVersion != null
         ? ` · catalog v${payload.catalogVersion}`

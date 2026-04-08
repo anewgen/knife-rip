@@ -2,6 +2,7 @@ import { PageShell } from "@/components/page-shell";
 import {
   CHANGELOG_ENTRIES,
   assertLatestChangelogMatchesCatalog,
+  formatChangelogDateEst,
 } from "@/lib/changelog";
 import { COMMAND_CATALOG_VERSION } from "@/lib/commands";
 import { Card } from "@/components/ui/card";
@@ -37,8 +38,11 @@ export default function ChangelogPage() {
                 <h2 className="font-display text-lg font-semibold text-accent-strong">
                   {entry.title}
                 </h2>
-                <span className="text-xs font-medium uppercase tracking-wider text-muted">
-                  {entry.date}
+                <span className="text-xs font-medium text-muted">
+                  <time dateTime={entry.date}>
+                    {formatChangelogDateEst(entry.date)}
+                  </time>
+                  <span className="opacity-80"> · US Eastern</span>
                   {entry.catalogVersion != null
                     ? ` · catalog v${entry.catalogVersion}`
                     : ""}

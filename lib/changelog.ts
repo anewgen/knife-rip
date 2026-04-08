@@ -3,6 +3,9 @@ import { siteMetadataBase } from "@/lib/site-url";
 
 /**
  * What's new — newest first. Public-facing copy only (no env names or markdown bold).
+ *
+ * `date` is the release calendar day (YYYY-MM-DD, America/New_York). Display via
+ * {@link formatChangelogDateEst}.
  */
 export type ChangelogEntry = {
   id: string;
@@ -13,11 +16,28 @@ export type ChangelogEntry = {
   bullets?: string[];
 };
 
+/** Format a changelog YYYY-MM-DD for readers in US Eastern (EST/EDT). */
+export function formatChangelogDateEst(isoDate: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate.trim());
+  if (!m) return isoDate;
+  const y = Number(m[1]);
+  const mo = Number(m[2]);
+  const d = Number(m[3]);
+  if (!y || mo < 1 || mo > 12 || d < 1 || d > 31) return isoDate;
+  const instant = Date.UTC(y, mo - 1, d, 12, 0, 0);
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(instant));
+}
+
 export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   {
-    id: "2026-04-11-v25-economy-config",
+    id: "2026-04-07-v25-economy-config",
     catalogVersion: 25,
-    date: "2026-04-11",
+    date: "2026-04-07",
     title: "Economy and commands page",
     summary:
       "Optional per-server message stats and shop items via environment variables; owner-only commands show a Developer label on the command list.",
@@ -27,9 +47,9 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
     ],
   },
   {
-    id: "2026-04-10-v24-gambling",
+    id: "2026-04-05-v24-gambling",
     catalogVersion: 24,
-    date: "2026-04-10",
+    date: "2026-04-05",
     title: "Knife Cash hub",
     summary:
       "Gambling menu with shop, games, stats, and transfers. Cash command for balances; owner tools for grants and lucky drops.",
@@ -39,17 +59,17 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
     ],
   },
   {
-    id: "2026-04-09-v23-leaderboards",
+    id: "2026-04-02-v23-leaderboards",
     catalogVersion: 23,
-    date: "2026-04-09",
+    date: "2026-04-02",
     title: "Text and voice leaderboards",
     summary:
       "Leaderboards for messages sent and time in voice (AFK channels excluded). Stats build while the bot is in the server.",
   },
   {
-    id: "2026-04-05-v22-commands",
+    id: "2026-03-25-v22-commands",
     catalogVersion: 22,
-    date: "2026-04-05",
+    date: "2026-03-25",
     title: "Commands and permissions",
     summary:
       "More command aliases; staff actions require the right Discord permissions in the server.",

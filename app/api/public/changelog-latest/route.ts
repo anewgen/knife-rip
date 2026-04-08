@@ -1,5 +1,6 @@
 import {
   changelogEntryAbsoluteUrl,
+  formatChangelogDateEst,
   getLatestChangelogEntry,
 } from "@/lib/changelog";
 import { COMMAND_CATALOG_VERSION } from "@/lib/commands";
@@ -21,6 +22,7 @@ export async function GET() {
         summary: entry.summary,
         url,
         date: entry.date,
+        dateDisplay: `${formatChangelogDateEst(entry.date)} (US Eastern)`,
         catalogVersion:
           entry.catalogVersion ?? COMMAND_CATALOG_VERSION,
         id: entry.id,
