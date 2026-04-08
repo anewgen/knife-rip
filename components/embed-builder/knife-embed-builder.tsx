@@ -241,11 +241,11 @@ export function KnifeEmbedBuilder() {
 
   const loadStarterTemplate = () => {
     setMessageContent(
-      "Moderation — case review for {user.mention} in {channel.mention}.\n\nUse buttons below to resolve.",
+      "Moderation — case review for {user} in #{channel.name}.\n\nUse buttons below to resolve.",
     );
     setTitle("Case · {user}");
     setDescription(
-      "Staff {member} is reviewing this report.\n\n• Guild: {guild.name} ({guild.count} members)\n• Message: [jump]({message.url})",
+      "Staff {member} is reviewing this report.\n\n• Guild: {guild.name} ({guild.count} members)\n• Channel: #{channel.name}",
     );
     setUrl("https://knife.rip/docs");
     setColor("#ef4444");
@@ -261,7 +261,7 @@ export function KnifeEmbedBuilder() {
       {
         id: randomId(),
         name: "Reporter",
-        value: "{member.mention}",
+        value: "{member}",
         inline: true,
       },
       {
@@ -273,7 +273,7 @@ export function KnifeEmbedBuilder() {
       {
         id: randomId(),
         name: "Notes",
-        value: "Toggle Sample data in the panel to see tokens → real demo values.",
+        value: "Use Sample data in the panel to resolve placeholders in preview.",
         inline: false,
       },
     ]);

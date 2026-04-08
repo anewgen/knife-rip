@@ -103,6 +103,8 @@ export function ColorPicker({
   className,
 }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const satRef = useRef<HTMLDivElement>(null);
   const hueRef = useRef<HTMLDivElement>(null);
 
@@ -111,6 +113,11 @@ export function ColorPicker({
 
   const [open, setOpen] = useState(false);
   const [hsv, setHsv] = useState<Hsv>(externalHsv);
+  const [panelStyle, setPanelStyle] = useState<{
+    top: number;
+    left: number;
+    width: number;
+  } | null>(null);
 
   useEffect(() => {
     setHsv(externalHsv);
@@ -133,6 +140,38 @@ export function ColorPicker({
       document.removeEventListener("keydown", onKey);
     };
   }, [open, close]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const place = () => {
+      const trigger = triggerRef.current;
+      if (!trigger) return;
+      const r = trigger.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const width = Math.min(320, vw - 16);
+
+      let left = r.right - width;
+      left = clamp(left, 8, Math.max(8, vw - width - 8));
+
+      // Try below first, then flip above if there isn't enough room.
+      const panelH = panelRef.current?.offsetHeight ?? 420;
+      const belowTop = r.bottom + 10;
+      const aboveTop = r.top - panelH - 10;
+      const top = belowTop + panelH <= vh - 8 ? belowTop : Math.max(8, aboveTop);
+
+      setPanelStyle({ top, left, width });
+    };
+
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, { passive: true });
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place);
+    };
+  }, [open]);
 
   const commit = useCallback(
     (next: Hsv) => {
@@ -192,6 +231,7 @@ export function ColorPicker({
   return (
     <div ref={rootRef} className={cn("relative", className)}>
       <button
+        ref={triggerRef}
         id={id}
         type="button"
         aria-label={ariaLabel}
@@ -214,9 +254,15 @@ export function ColorPicker({
 
       {open ? (
         <div
+          ref={panelRef}
           role="dialog"
           aria-label="Color picker"
-          className="absolute right-0 top-[calc(100%+10px)] z-[140] w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-white/[0.1] bg-[#161010] shadow-[0_24px_72px_-18px_rgba(0,0,0,0.92)]"
+          className="fixed z-[140] overflow-hidden rounded-2xl border border-white/[0.1] bg-[#161010] shadow-[0_24px_72px_-18px_rgba(0,0,0,0.92)]"
+          style={
+            panelStyle
+              ? { top: panelStyle.top, left: panelStyle.left, width: panelStyle.width }
+              : undefined
+          }
         >
           <div className="p-4">
             <div className="flex items-start justify-between gap-3">

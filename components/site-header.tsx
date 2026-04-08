@@ -49,10 +49,10 @@ export function SiteHeader({ locale, header }: Props) {
 
   return (
     <header className="sticky top-0 z-50 border-b border-red-950/35 bg-background/80 backdrop-blur-xl backdrop-saturate-150">
-      <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 sm:h-16 sm:gap-5 sm:px-6 lg:px-8">
+      <div className="relative mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 sm:h-16 sm:gap-5 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="motion-safe:transition flex shrink-0 items-center gap-2.5 rounded-full py-1 text-accent-strong hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="motion-safe:transition relative z-[2] flex shrink-0 items-center gap-2.5 rounded-full py-1 text-accent-strong hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <BrandMark className="h-7 w-7 text-edge sm:h-8 sm:w-8" />
           <span className="font-display text-lg font-bold tracking-tight">
@@ -61,10 +61,10 @@ export function SiteHeader({ locale, header }: Props) {
         </Link>
 
         <nav
-          className="hidden min-w-0 flex-1 justify-center px-2 lg:px-4 xl:px-6 md:flex"
+          className="pointer-events-none absolute left-1/2 top-1/2 hidden w-max max-w-[calc(100%-13rem)] -translate-x-1/2 -translate-y-1/2 justify-center px-2 md:flex lg:max-w-[calc(100%-24rem)] xl:max-w-[calc(100%-28rem)]"
           aria-label={header.mainNavAria}
         >
-          <div className="nav-pill-sheen inline-flex max-w-full items-center gap-px overflow-x-auto rounded-full border border-white/[0.07] bg-surface/45 px-1 py-1 shadow-[0_0_40px_-18px_rgba(220,38,38,0.18)] backdrop-blur-md scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div className="nav-pill-sheen pointer-events-auto inline-flex max-w-full items-center gap-px overflow-x-auto rounded-full border border-white/[0.07] bg-surface/45 px-1 py-1 shadow-[0_0_40px_-18px_rgba(220,38,38,0.18)] backdrop-blur-md scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {NAV.map((item) => (
               <Link
                 key={item.href}
@@ -87,7 +87,7 @@ export function SiteHeader({ locale, header }: Props) {
           </div>
         </nav>
 
-        <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-2.5 lg:gap-3">
+        <div className="relative z-[2] ml-auto flex shrink-0 items-center gap-2 md:gap-2.5 lg:gap-3">
           <LanguageSwitcher
             locale={locale}
             ariaLabel={header.languageAria}

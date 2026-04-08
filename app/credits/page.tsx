@@ -30,22 +30,13 @@ const CREDIT_MEMBERS: CreditMember[] = [
     badges: ["mdi:code-braces", "mdi:server-network", "mdi:shield-crown-outline"],
   },
   {
-    name: "Contributor One",
-    role: "Manager",
-    roleIcon: "mdi:shield-account-outline",
-    avatar: "/showcase/ak.png",
-    accent: "#a855f7",
-    bio: "Operations, moderation standards, and release coordination.",
-    badges: ["mdi:account-check-outline", "mdi:timeline-clock-outline"],
-  },
-  {
-    name: "Contributor Two",
+    name: "Poser",
     role: "Contributor",
     roleIcon: "mdi:star-outline",
     avatar: "/showcase/ak.png",
-    accent: "#22c55e",
-    bio: "Feature feedback, docs notes, and testing support.",
-    badges: ["mdi:test-tube", "mdi:note-text-outline"],
+    accent: "#a855f7",
+    bio: "Contributor on Knife projects and community initiatives.",
+    badges: ["mdi:guitar-electric", "mdi:star-circle-outline"],
   },
 ];
 
@@ -60,14 +51,10 @@ export default function CreditsPage() {
         <h1 className="font-display text-3xl font-bold tracking-tight text-accent-strong sm:text-4xl">
           Credits
         </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted sm:text-base">
-          The people behind Knife. You can send updated names, roles, avatars,
-          and badge icons later and this page is ready to swap them in.
-        </p>
       </header>
 
       <section>
-        <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-2">
           {CREDIT_MEMBERS.map((m) => (
             <li key={m.name}>
               <article
@@ -120,14 +107,6 @@ export default function CreditsPage() {
             </li>
           ))}
         </ul>
-      </section>
-
-      <section className="rounded-2xl border border-white/[0.06] bg-surface/40 p-5 text-sm leading-relaxed text-muted sm:p-6">
-        <p>
-          Want edits here later? Send names, role titles, avatars, and icon ids
-          (for example <code className="font-mono text-edge">mdi:shield-star-outline</code>)
-          and the cards can be updated directly.
-        </p>
       </section>
     </main>
   );

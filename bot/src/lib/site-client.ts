@@ -248,3 +248,30 @@ export async function postCommandRegistry(payload: object): Promise<void> {
     );
   }
 }
+
+export async function postStatusSnapshot(payload: object): Promise<void> {
+  const secret = getBotInternalSecret();
+  if (!secret) return;
+
+  const base = getSiteApiBase();
+  const url = new URL("/api/internal/status", `${base}/`);
+  const res = await siteFetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${secret}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (res.status === 503) {
+    throw new Error("Status API unavailable (BOT_INTERNAL_SECRET missing on site)");
+  }
+  if (res.status === 401) {
+    throw new Error("Status API rejected token");
+  }
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Status snapshot sync failed ${res.status}: ${text.slice(0, 200)}`);
+  }
+}

@@ -206,7 +206,7 @@ export function CommandsCatalog({ categories }: Props) {
 
   return (
     <div className="flex flex-col gap-10">
-      <div className="relative max-w-xl">
+      <div className="relative mx-auto w-full max-w-xl">
         <label htmlFor="cmd-search" className="sr-only">
           Search commands
         </label>
@@ -237,13 +237,13 @@ export function CommandsCatalog({ categories }: Props) {
         ) : null}
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 text-center">
         <p className="text-xs font-medium uppercase tracking-wide text-muted">
           Categories
         </p>
-        <div className="relative">
+        <div className="relative mx-auto w-full max-w-5xl">
           <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-background to-transparent" />
-          <div className="flex items-center gap-1 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex items-center justify-center gap-1 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <button
               type="button"
               onClick={() => {

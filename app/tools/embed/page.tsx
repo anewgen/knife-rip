@@ -1,6 +1,5 @@
 import { KnifeEmbedBuilder } from "@/components/embed-builder/knife-embed-builder";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
-import { ButtonLink } from "@/components/ui/button-link";
 import { Icon } from "@/components/ui/icon";
 import { siteMetadataBase } from "@/lib/site-url";
 import type { Metadata } from "next";
@@ -39,34 +38,6 @@ export default function EmbedBuilderPage() {
           />
           Embed builder
         </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted sm:text-base">
-          Compose a{" "}
-          <code className="rounded-md bg-surface-elevated px-1.5 py-0.5 font-mono text-sm text-edge">
-            {"{embed}$v"}
-          </code>{" "}
-          script for{" "}
-          <code className="font-mono text-sm text-accent-strong">.say</code> /{" "}
-          <code className="font-mono text-sm text-accent-strong">
-            .createembed
-          </code>
-          . The live panel mirrors Discord as you type — toggle{" "}
-          <strong className="font-semibold text-foreground/90">sample data</strong>{" "}
-          to see how variables resolve. Webhook JSON still works too.
-        </p>
-        <div className="mt-5 flex flex-wrap gap-2 sm:gap-3">
-          <ButtonLink href="/commands" variant="secondary">
-            <span className="inline-flex items-center gap-2">
-              <Icon icon="mdi:console" className="size-4" aria-hidden />
-              Commands
-            </span>
-          </ButtonLink>
-          <ButtonLink href="/docs">
-            <span className="inline-flex items-center gap-2">
-              <Icon icon="mdi:book-open-variant" className="size-4" aria-hidden />
-              Docs
-            </span>
-          </ButtonLink>
-        </div>
       </ScrollReveal>
 
       <KnifeEmbedBuilder />

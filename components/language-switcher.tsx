@@ -84,7 +84,7 @@ export function LanguageSwitcher({
         aria-haspopup="listbox"
         onClick={() => setOpen((o) => !o)}
         className={cn(
-          "inline-flex h-10 items-center gap-2 rounded-full border border-white/[0.12] bg-surface/50 px-2.5 text-left",
+          "inline-flex h-10 items-center gap-1.5 rounded-full border border-white/[0.12] bg-surface/50 px-2 text-left",
           "motion-safe:transition hover:border-white/[0.18] hover:bg-surface/80",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-edge/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
           pending && "opacity-60",
@@ -96,12 +96,9 @@ export function LanguageSwitcher({
         >
           <Icon icon={current.flagIcon} className="size-6" aria-hidden />
         </span>
-        <span className="hidden min-w-0 sm:inline">
-          <span className="font-semibold text-foreground">{current.label}</span>
-        </span>
         <Icon
           icon={open ? "mdi:chevron-up" : "mdi:chevron-down"}
-          className="size-4 shrink-0 text-muted"
+          className="size-3.5 shrink-0 text-muted"
           aria-hidden
         />
       </button>

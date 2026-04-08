@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
+import { getBotStatusSnapshot } from "@/lib/bot-status";
 import {
   formatUtcMonthLabel,
   getPublicTopCommandsThisMonth,
@@ -14,9 +15,31 @@ export const metadata: Metadata = {
 
 export const revalidate = 900;
 
+function formatUptime(ms: number): string {
+  const sec = Math.floor(ms / 1000);
+  const d = Math.floor(sec / 86400);
+  const h = Math.floor((sec % 86400) / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  if (d > 0) return `${d}d ${h}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
 export default async function StatusPage() {
-  const topCommands = await getPublicTopCommandsThisMonth(5);
+  const [topCommands, statusMeta] = await Promise.all([
+    getPublicTopCommandsThisMonth(5),
+    getBotStatusSnapshot(),
+  ]);
   const monthLabel = formatUtcMonthLabel();
+  const snapshot = statusMeta.snapshot;
+  const shards = snapshot?.shards ?? [];
+  const totalGuilds = shards.reduce((n, s) => n + s.guilds, 0);
+  const totalUsers = shards.reduce((n, s) => n + s.users, 0);
+  const avgLatency =
+    shards.length > 0
+      ? Math.round((shards.reduce((n, s) => n + s.latencyMs, 0) / shards.length) * 100) /
+        100
+      : null;
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-10 px-4 py-10 sm:gap-12 sm:px-6 sm:py-14 lg:px-8">
@@ -37,30 +60,6 @@ export default async function StatusPage() {
             </Link>
             .
           </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <Icon
-              icon="mdi:magnify"
-              className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-muted"
-              aria-hidden
-            />
-            <input
-              type="search"
-              placeholder="Enter your Server ID"
-              aria-label="Find a server by ID"
-              className="w-[min(22rem,calc(100vw-2rem))] rounded-2xl border border-white/[0.08] bg-background/80 py-3 pl-11 pr-4 text-sm text-foreground outline-none ring-edge/25 motion-safe:transition focus:border-edge/35 focus:ring-2"
-            />
-          </div>
-          <button
-            type="button"
-            className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/[0.08] bg-surface/50 text-muted motion-safe:transition hover:border-white/[0.14] hover:bg-surface-elevated/40 hover:text-foreground"
-            aria-label="Search"
-            title="Search"
-          >
-            <Icon icon="mdi:arrow-right" className="size-6" aria-hidden />
-          </button>
         </div>
       </header>
 
@@ -85,10 +84,15 @@ export default async function StatusPage() {
           >
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-foreground">Database</p>
-                <p className="mt-1 text-xs text-muted">Enabled</p>
+                <p className="text-sm font-semibold text-foreground">Shards</p>
+                <p className="mt-1 text-xs text-muted">
+                  {snapshot ? `${snapshot.shardCount} reporting` : "No live snapshot yet"}
+                </p>
               </div>
-              <span className="size-2.5 shrink-0 rounded-full bg-success shadow-[0_0_12px_rgba(34,197,94,0.25)]" aria-hidden />
+              <span
+                className="size-2.5 shrink-0 rounded-full bg-success shadow-[0_0_12px_rgba(34,197,94,0.25)]"
+                aria-hidden
+              />
             </div>
           </Card>
           <Card
@@ -98,10 +102,15 @@ export default async function StatusPage() {
           >
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-foreground">Redis</p>
-                <p className="mt-1 text-xs text-muted">Enabled</p>
+                <p className="text-sm font-semibold text-foreground">Servers</p>
+                <p className="mt-1 text-xs text-muted">
+                  {totalGuilds.toLocaleString()} across all shards
+                </p>
               </div>
-              <span className="size-2.5 shrink-0 rounded-full bg-success shadow-[0_0_12px_rgba(34,197,94,0.25)]" aria-hidden />
+              <span
+                className="size-2.5 shrink-0 rounded-full bg-success shadow-[0_0_12px_rgba(34,197,94,0.25)]"
+                aria-hidden
+              />
             </div>
           </Card>
           <Card
@@ -111,23 +120,43 @@ export default async function StatusPage() {
           >
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-foreground">Web</p>
-                <p className="mt-1 text-xs text-muted">Operational</p>
+                <p className="text-sm font-semibold text-foreground">Users</p>
+                <p className="mt-1 text-xs text-muted">
+                  {totalUsers.toLocaleString()} member slots cached
+                </p>
               </div>
-              <span className="size-2.5 shrink-0 rounded-full bg-success shadow-[0_0_12px_rgba(34,197,94,0.25)]" aria-hidden />
+              <span
+                className="size-2.5 shrink-0 rounded-full bg-success shadow-[0_0_12px_rgba(34,197,94,0.25)]"
+                aria-hidden
+              />
             </div>
           </Card>
         </div>
+        <p className="text-xs text-muted">
+          {statusMeta.updatedAt
+            ? `Last bot snapshot: ${statusMeta.updatedAt.toLocaleString()}`
+            : "No bot snapshot has been synced yet."}
+          {avgLatency != null ? ` · Avg latency: ${avgLatency.toFixed(2)}ms` : ""}
+        </p>
       </section>
 
       <section className="space-y-4">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">
           Shards
         </h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 9 }).map((_, i) => (
+        {!snapshot || shards.length === 0 ? (
+          <Card padding="lg" className="border-dashed border-white/[0.12] bg-surface/30">
+            <p className="text-sm text-muted">
+              Waiting for live shard telemetry from the bot. Once the bot is online
+              with `BOT_INTERNAL_SECRET` configured, real shard counts and amounts
+              appear here automatically.
+            </p>
+          </Card>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {shards.map((s) => (
             <Card
-              key={i}
+              key={s.id}
               padding="none"
               surface="plain"
               className="overflow-hidden border-white/[0.07] bg-[#0f0b0b]/70"
@@ -136,11 +165,11 @@ export default async function StatusPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-foreground">
-                      Shard {i}
+                      Shard {s.id}
                     </p>
                     <p className="mt-1 flex items-center gap-2 text-xs text-muted">
                       <Icon icon="mdi:refresh" className="size-4 opacity-80" aria-hidden />
-                      1m ago
+                      live snapshot
                     </p>
                   </div>
                   <span className="inline-flex items-center gap-2 rounded-full border border-success/25 bg-success/10 px-3 py-1 text-xs font-semibold text-success">
@@ -155,14 +184,16 @@ export default async function StatusPage() {
                     <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">
                       Uptime
                     </p>
-                    <p className="mt-1 text-sm font-semibold text-foreground">8h</p>
+                    <p className="mt-1 text-sm font-semibold text-foreground">
+                      {formatUptime(s.uptimeMs)}
+                    </p>
                   </div>
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">
                       Latency
                     </p>
                     <p className="mt-1 text-sm font-semibold text-foreground">
-                      {(95 + (i * 7) % 24).toFixed(2)}ms
+                      {s.latencyMs.toFixed(2)}ms
                     </p>
                   </div>
                   <div>
@@ -170,7 +201,7 @@ export default async function StatusPage() {
                       Servers
                     </p>
                     <p className="mt-1 text-sm font-semibold text-foreground">
-                      {(1650 + i * 23).toLocaleString()}
+                      {s.guilds.toLocaleString()}
                     </p>
                   </div>
                   <div>
@@ -178,14 +209,15 @@ export default async function StatusPage() {
                       Users
                     </p>
                     <p className="mt-1 text-sm font-semibold text-foreground">
-                      {(110_000 + i * 17_500).toLocaleString()}
+                      {s.users.toLocaleString()}
                     </p>
                   </div>
                 </div>
               </div>
             </Card>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       <Card padding="lg" elevated className="border-white/[0.08] bg-surface/45">

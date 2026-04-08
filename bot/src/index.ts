@@ -49,6 +49,7 @@ import {
   handleReactionRoleAdd,
   handleReactionRoleRemove,
 } from "./lib/reaction-role-events";
+import { syncStatusToSite } from "./lib/status-sync";
 
 acquireSingleInstanceLock();
 
@@ -110,6 +111,12 @@ client.once(Events.ClientReady, async (c) => {
   } catch (err) {
     console.warn("Command catalog sync failed:", err);
   }
+  try {
+    await syncStatusToSite(c);
+    console.log("Status snapshot synced to site.");
+  } catch (err) {
+    console.warn("Status snapshot sync failed:", err);
+  }
 
   try {
     await reconcileOrphanTemps(c);
@@ -140,6 +147,12 @@ client.once(Events.ClientReady, async (c) => {
     void tickBtcTxWatches(c);
   }, 60_000);
   void tickBtcTxWatches(c);
+
+  setInterval(() => {
+    syncStatusToSite(c).catch((err) =>
+      console.warn("Status snapshot sync failed:", err),
+    );
+  }, 60_000);
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
