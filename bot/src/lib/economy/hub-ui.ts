@@ -36,17 +36,41 @@ export function buildGambleDisclaimerPayload(params: {
   const { userId, guild } = params;
   const embed = new EmbedBuilder()
     .setColor(0xf0b232)
-    .setTitle(`${ecoM.games} Knife Cash — please read`)
+    .setTitle(`${ecoM.games} Knife Cash`)
     .setDescription(
-      "**Knife Cash is not real money.** It’s a pretend balance for fun on Discord.\n\n" +
-        "• You can lose cash on games — only bet what you’re fine losing.\n" +
-        "• This is not real-world gambling; there is no cash-out or prize value.\n" +
-        "• Boosters / Knife Pro members get 20% more money.\n" +
-        "• **.daily** — claim **50** cash once every **24 hours**.\n" +
-        "• Bets you start from the Knife Cash menu appear **in this channel** so others can see wins and losses.\n" +
-        "• Message milestones (in configured servers): " +
-        `${MILESTONE_HELP_LINES.join(" · ")}.\n\n` +
-        `${ecoM.tablerinfosquarefilled} Press **I understand** below to open the Knife Cash menu.`,
+      "_Quick read — a few short sections below._\n\n" +
+        `${ecoM.tablerinfosquarefilled} When you’re ready, press **I understand** at the bottom.`,
+    )
+    .addFields(
+      {
+        name: "What this is",
+        value:
+          "Knife Cash is **not real money**.\n" +
+          "It’s pretend balance for fun — **no cash-out**, no real-world value.",
+        inline: false,
+      },
+      {
+        name: "Before you bet",
+        value:
+          "• You **can lose** cash on games — only bet what you’re fine losing.\n\n" +
+          "• **Not** real-world gambling.\n\n" +
+          "• Bets you start from this menu post **in this channel** — others can see wins and losses.",
+        inline: false,
+      },
+      {
+        name: "Bonuses",
+        value:
+          "• **.daily** — **50** cash, once every **24 hours**.\n\n" +
+          "• Server boosters and **Knife Pro** (and owners) get **+20%** on eligible payouts.",
+        inline: false,
+      },
+      {
+        name: "Message milestones",
+        value:
+          "_Only in servers the bot is set to track._\n\n" +
+          MILESTONE_HELP_LINES.map((line) => `• ${line}`).join("\n\n"),
+        inline: false,
+      },
     )
     .setFooter({
       text: `${guild?.name ? `${guild.name} · ` : ""}The button only works for you`,
