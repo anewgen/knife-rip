@@ -1,5 +1,8 @@
 import type { Prisma } from "@prisma/client";
+import { getEconomyTreasuryUserId } from "../../config";
 import { getBotPrisma } from "../db-prisma";
+
+export type Tx = Prisma.TransactionClient;
 
 export async function getOrCreateEconomyUser(discordUserId: string) {
   const prisma = getBotPrisma();
@@ -41,7 +44,19 @@ export type LedgerReason =
   | "luckydrop"
   | "daily"
   | "message_drop"
-  | "pvp_coinflip";
+  | "pvp_coinflip"
+  | "work"
+  | "crime"
+  | "beg"
+  | "rob"
+  | "bank"
+  | "business"
+  | "gather"
+  | "duel"
+  | "bounty"
+  | "pet"
+  | "treasury_fee"
+  | "bank_interest";
 
 /**
  * Apply a cash delta in a transaction; rejects if balance would go negative.
@@ -182,4 +197,66 @@ export async function setCashAbsolute(params: {
     });
     return target;
   });
+}
+
+/**
+ * Credit the configured treasury Discord user (explicit fee sink recipient).
+ * Use inside an existing `$transaction` when pairing with other balance moves.
+ */
+export async function creditTreasuryInTx(
+  tx: Tx,
+  params: {
+    delta: bigint;
+    reason: LedgerReason;
+    meta?: Prisma.InputJsonValue;
+    actorUserId?: string | null;
+  },
+): Promise<bigint> {
+  const treasuryId = getEconomyTreasuryUserId();
+  const { delta, reason, meta, actorUserId } = params;
+  if (delta === 0n) {
+    const row = await tx.economyUser.upsert({
+      where: { discordUserId: treasuryId },
+      create: { discordUserId: treasuryId },
+      update: {},
+    });
+    return row.cash;
+  }
+
+  await tx.economyUser.upsert({
+    where: { discordUserId: treasuryId },
+    create: { discordUserId: treasuryId },
+    update: {},
+  });
+  const row = await tx.economyUser.findUnique({
+    where: { discordUserId: treasuryId },
+  });
+  if (!row) throw new Error("TREASURY_UPSERT");
+  const next = row.cash + delta;
+  if (next < 0n) throw new Error("INSUFFICIENT_FUNDS");
+  await tx.economyUser.update({
+    where: { discordUserId: treasuryId },
+    data: { cash: next },
+  });
+  await tx.economyLedger.create({
+    data: {
+      discordUserId: treasuryId,
+      delta,
+      balanceAfter: next,
+      reason,
+      meta: meta ?? undefined,
+      actorUserId: actorUserId ?? undefined,
+    },
+  });
+  return next;
+}
+
+export async function creditTreasury(params: {
+  delta: bigint;
+  reason: LedgerReason;
+  meta?: Prisma.InputJsonValue;
+  actorUserId?: string | null;
+}): Promise<bigint> {
+  const prisma = getBotPrisma();
+  return prisma.$transaction((tx) => creditTreasuryInTx(tx, params));
 }

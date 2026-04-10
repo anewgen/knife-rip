@@ -1,4 +1,4 @@
-import { economyPayoutMultiplier } from "../../lib/economy/boost";
+import { resolvePayoutMultiplier } from "../../lib/economy/payout-multiplier";
 import { ecoM } from "../../lib/economy/custom-emojis";
 import { formatCash } from "../../lib/economy/money";
 import { getCash } from "../../lib/economy/wallet";
@@ -25,12 +25,12 @@ export const cashCommand: KnifeCommand = {
     const member =
       message.guild?.members.cache.get(target.id) ??
       (await message.guild?.members.fetch(target.id).catch(() => null));
-    const mult = await economyPayoutMultiplier(
-      member ?? null,
-      target.id,
-      message.client,
-    );
-    const bonus = mult > 1;
+    const mult = await resolvePayoutMultiplier({
+      userId: target.id,
+      member: member ?? null,
+      client: message.client,
+    });
+    const bonus = mult > 1.001;
     const title =
       target.id === message.author.id
         ? `${ecoM.wallet} Your wallet`
@@ -42,8 +42,8 @@ export const cashCommand: KnifeCommand = {
           description:
             `${ecoM.wallet} **Balance:** **${formatCash(bal)}** cash\n` +
             (bonus
-              ? `${ecoM.booster} **+20%** earnings on wins & milestones (boost / Pro / owner).`
-              : `${ecoM.tablerinfosquarefilled} Link Discord Nitro boost or **Knife Pro** for **+20%** on wins & milestones.`),
+              ? `${ecoM.booster} **×${mult.toFixed(2)}** payout on wins & milestones (boost / Pro / equipped pet, capped).`
+              : `${ecoM.tablerinfosquarefilled} Boost, **Knife Pro**, or an equipped **pet** raise payouts (capped).`),
         }),
       ],
     });

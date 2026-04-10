@@ -24,8 +24,7 @@ export const vanityCommand: KnifeCommand = {
     categoryId: "pro",
     categoryTitle: "Pro",
     categoryDescription: "Knife Pro billing and perks.",
-    usage:
-      ".vanity search <code> · .vanity drop · .vanities · /vanities drop · /vanities search",
+    usage: ".vanity search <code> · .vanity drop · .vanities",
     tier: "pro",
     style: "prefix",
   },
@@ -87,9 +86,7 @@ export const vanityCommand: KnifeCommand = {
             "**Knife Pro** — track dictionary slugs against Discord invites.\n\n" +
             "• **.vanity search** `code` — one slug lookup\n" +
             "• **.vanity drop** — recent releases (paginate with buttons)\n" +
-            "• **.vanities** — same as **drop**\n" +
-            "• **`/vanities search`** — slash lookup\n" +
-            "• **`/vanities drop`** — slash recent list\n\n" +
+            "• **.vanities** — same as **drop** (recent list)\n\n" +
             "_Background scans need **`VANITY_SCANNER_ENABLED=1`** in the bot environment._",
         }),
       ],

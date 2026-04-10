@@ -238,6 +238,10 @@ model VoiceMasterTempChannel {
 model EconomyUser {
   discordUserId      String    @id
   cash               BigInt    @default(0)
+  bankCash           BigInt    @default(0)
+  /// 0 = starter cap; higher tiers unlock larger `bankCash` caps.
+  bankTier           Int       @default(0)
+  lastBankInterestAt DateTime?
   lifetimeMessages   Int       @default(0)
   /// Highest 50-msg tier already paid (0, 50, 100, …). Each step grants +10; every 100 grants +50 extra.
   milestoneLastPaid50 Int      @default(0)
@@ -253,8 +257,22 @@ model EconomyUser {
   lastDailyAt        DateTime?
   /// Knife Cash disclaimer completed at least once (global; skips repeat prompts).
   gambleDisclaimerAcceptedAt DateTime?
+  lastWorkAt         DateTime?
+  lastCrimeAt        DateTime?
+  lastBegAt          DateTime?
+  lastRobAt          DateTime?
+  lastMineAt         DateTime?
+  lastFishAt         DateTime?
+  /// Victim-side: last successful robbery (anti chain-rob).
+  lastRobbedAt       DateTime?
+  /// Count of successful robberies against this user (UTC day in `robVictimDay`).
+  robVictimCount     Int       @default(0)
+  robVictimDay       String?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
+
+  pets          EconomyPet[]
+  businessSlots EconomyBusinessSlot[]
 }
 
 model EconomyLedger {
@@ -312,6 +330,69 @@ model EconomyCoinflipPvpChallenge {
 
   @@index([status, expiresAt])
   @@index([opponentDiscordId, status])
+}
+
+model EconomyPet {
+  id         String      @id @default(cuid())
+  ownerId    String
+  owner      EconomyUser @relation(fields: [ownerId], references: [discordUserId], onDelete: Cascade)
+  speciesKey String
+  nickname   String?
+  xp         Int         @default(0)
+  happiness  Int         @default(100)
+  equipped   Boolean     @default(false)
+  createdAt  DateTime    @default(now())
+
+  @@index([ownerId])
+  @@index([ownerId, equipped])
+}
+
+model EconomyBusinessSlot {
+  id              String      @id @default(cuid())
+  ownerId         String
+  owner           EconomyUser @relation(fields: [ownerId], references: [discordUserId], onDelete: Cascade)
+  businessKey     String
+  tier            Int         @default(1)
+  lastCollectedAt DateTime    @default(now())
+  createdAt       DateTime    @default(now())
+
+  @@unique([ownerId, businessKey])
+  @@index([ownerId])
+}
+
+/// Stake duel (rake to treasury) — settle when opponent accepts.
+model EconomyDuel {
+  id                  String    @id @default(cuid())
+  guildId             String
+  channelId           String
+  messageId           String?
+  challengerDiscordId String
+  opponentDiscordId   String
+  stake               BigInt
+  status              String    @default("pending")
+  winnerDiscordId     String?
+  expiresAt           DateTime
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([status, expiresAt])
+  @@index([opponentDiscordId, status])
+}
+
+/// Open bounty on a member; MVP payout when someone successfully `.rob`s the target in the same guild.
+model EconomyBounty {
+  id                String    @id @default(cuid())
+  posterDiscordId   String
+  targetDiscordId   String
+  amount            BigInt
+  guildId           String
+  status            String    @default("open")
+  claimerDiscordId  String?
+  createdAt         DateTime  @default(now())
+  fulfilledAt       DateTime?
+
+  @@index([guildId, status])
+  @@index([targetDiscordId, status])
 }
 
 /// Per-guild jail (`.jailsetup`) — role + channels for `.jail` / `.unjail`.

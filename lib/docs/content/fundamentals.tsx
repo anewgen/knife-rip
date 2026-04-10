@@ -30,9 +30,10 @@ export const fundamentalsPages: Record<string, DocPageDefinition> = {
         content: (
           <>
             <p>
-              Add Knife with the bot scopes your host documents — typically{" "}
-              <code>applications.commands</code> if you use slash utilities (for example{" "}
-              <code>/vanities</code>) plus the <code>bot</code> scope.
+              Add Knife with the <code>bot</code> scope (and{" "}
+              <code>applications.commands</code> if you rely on other slash integrations your
+              host documents). Vanity scanning uses prefix <strong>.vanities</strong> /{" "}
+              <strong>.vanity</strong> only.
             </p>
             <p>
               Place the bot role <strong>below</strong> roles it should assign and{" "}

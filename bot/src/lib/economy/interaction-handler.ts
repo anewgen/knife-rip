@@ -31,6 +31,11 @@ import {
   handleCoinflipPvpDecline,
 } from "./coinflip-pvp-flow";
 import {
+  handleDuelAccept,
+  handleDuelDecline,
+} from "./duel-flow";
+import { handlePetMenuButton } from "./pet-menu";
+import {
   handleBlackjackButton,
   runBlackjackInitial,
 } from "./blackjack-flow";
@@ -175,6 +180,41 @@ async function handleEconomyButton(interaction: ButtonInteraction): Promise<void
         interaction,
         challengeId,
         opponentId: uid,
+      });
+    }
+    return;
+  }
+
+  if (
+    tok[0] === "ecduel" &&
+    tok[1] &&
+    (tok[2] === "a" || tok[2] === "d")
+  ) {
+    const duelId = tok[1]!;
+    await interaction.deferUpdate();
+    if (tok[2] === "a") {
+      await handleDuelAccept({
+        interaction,
+        duelId,
+        opponentId: uid,
+      });
+    } else {
+      await handleDuelDecline({
+        interaction,
+        duelId,
+        opponentId: uid,
+      });
+    }
+    return;
+  }
+
+  if (tok[0] === "pet") {
+    const handled = await handlePetMenuButton({ uid, tok, interaction });
+    if (handled) return;
+    if (!interaction.replied && !interaction.deferred) {
+      await interaction.reply({
+        ephemeral: true,
+        content: "❌ That pet action is no longer valid.",
       });
     }
     return;

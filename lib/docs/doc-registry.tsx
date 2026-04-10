@@ -33,7 +33,7 @@ export const DOCS_OVERVIEW: DocPageDefinition = {
         <>
           <p>
             Welcome to Knife&apos;s documentation. These guides mirror the product you run
-            today: prefix commands, optional slash utilities, the web dashboard, and Knife Pro
+            today: prefix commands, the web dashboard, and Knife Pro
             entitlements tied to <a href="https://knife.rip">knife.rip</a>.
           </p>
           <p>

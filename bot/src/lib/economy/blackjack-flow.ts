@@ -8,7 +8,7 @@ import {
   type MessageActionRowComponentBuilder,
 } from "discord.js";
 import { getBotPrisma } from "../db-prisma";
-import { economyPayoutMultiplier } from "./boost";
+import { resolvePayoutMultiplier } from "./payout-multiplier";
 import { ECON_INTERACTION_PREFIX } from "./config";
 import { ecoBtn, ecoM } from "./custom-emojis";
 import { applyGambleOutcomeInTx } from "./gamble-outcome";
@@ -216,7 +216,7 @@ export async function runBlackjackInitial(params: {
 }> {
   pruneBlackjackSessions();
   const { userId, bet, member, client } = params;
-  const mult = await economyPayoutMultiplier(member, userId, client);
+  const mult = await resolvePayoutMultiplier({ userId, member, client });
   const mc = multCents(mult);
 
   const player = [drawCard(), drawCard()];
@@ -341,7 +341,7 @@ export async function handleBlackjackButton(params: {
     };
   }
 
-  const mult = await economyPayoutMultiplier(member, userId, client);
+  const mult = await resolvePayoutMultiplier({ userId, member, client });
   const mc = multCents(mult);
   const bet = session.bet;
 

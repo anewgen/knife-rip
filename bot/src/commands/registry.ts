@@ -12,12 +12,26 @@ import { subscribeCommand } from "./general/btc-tx-subscribe";
 import { channelinfoCommand } from "./general/channelinfo";
 import { compressCommand } from "./general/compress";
 import { baltopCommand } from "./economy/baltop";
+import { bankCommand } from "./economy/bank";
+import { begCommand } from "./economy/beg";
+import { bountyCommand } from "./economy/bounty";
+import { businessCommand } from "./economy/business";
 import { cashCommand } from "./economy/cash";
+import { crimeCommand } from "./economy/crime";
 import { dailyCommand } from "./economy/daily";
+import { depositCommand } from "./economy/deposit";
+import { duelCommand } from "./economy/duel";
+import { fishCommand } from "./economy/fish";
 import { gambleCommand } from "./economy/gamble";
 import { gcashCommand } from "./economy/gcash";
 import { luckydropCommand } from "./economy/luckydrop";
 import { messagedropCommand } from "./economy/messagedrop";
+import { mineCommand } from "./economy/mine";
+import { petCommand } from "./economy/pet";
+import { petsCommand } from "./economy/pets";
+import { robCommand } from "./economy/rob";
+import { withdrawCommand } from "./economy/withdraw";
+import { workCommand } from "./economy/work";
 import { creditsCommand } from "./general/credits";
 import { cryptoCommand } from "./general/crypto-price";
 import { transactionCommand } from "./general/crypto-transaction";
@@ -283,6 +297,20 @@ export const commandDefinitions: KnifeCommand[] = [
   forcenicknameCommand,
   voicemasterCommand,
   webhookCommand,
+  bankCommand,
+  begCommand,
+  bountyCommand,
+  businessCommand,
+  crimeCommand,
+  depositCommand,
+  duelCommand,
+  fishCommand,
+  mineCommand,
+  petCommand,
+  petsCommand,
+  robCommand,
+  withdrawCommand,
+  workCommand,
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 export function buildCommandMap(

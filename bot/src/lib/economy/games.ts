@@ -1,7 +1,7 @@
 import { randomInt } from "crypto";
 import type { Client, GuildMember } from "discord.js";
 import { getBotPrisma } from "../db-prisma";
-import { economyPayoutMultiplier } from "./boost";
+import { resolvePayoutMultiplier } from "./payout-multiplier";
 import { applyGambleOutcomeInTx } from "./gamble-outcome";
 import { ecoM } from "./custom-emojis";
 import { formatCash, formatGambleNetLine } from "./money";
@@ -75,7 +75,7 @@ export async function runHouseGame(params: {
     }
   }
 
-  const mult = await economyPayoutMultiplier(member, userId, client);
+  const mult = await resolvePayoutMultiplier({ userId, member, client });
   const mc = multCents(mult);
   const prisma = getBotPrisma();
 

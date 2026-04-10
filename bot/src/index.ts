@@ -4,6 +4,7 @@ import {
   GatewayIntentBits,
   Partials,
 } from "discord.js";
+import { clearGlobalApplicationCommands } from "./lib/clear-global-commands";
 import { recordBoosterChange } from "./lib/booster-events";
 import { tickBirthdayCelebrateRoles } from "./lib/birthday-scheduler";
 import { handleUtilityMessageSideEffects } from "./lib/utility-social-hooks";
@@ -56,11 +57,6 @@ import {
   tickVanityScanner,
   vanityScannerTickPeriodMs,
 } from "./lib/vanity/scanner";
-import {
-  handleVanitySlashCommand,
-  registerVanitySlashCommands,
-} from "./lib/vanity/slash";
-
 acquireSingleInstanceLock();
 
 const client = new Client({
@@ -85,7 +81,7 @@ const PRIVILEGE_RECONCILE_MS = 20 * 60 * 1000;
 
 client.once(Events.ClientReady, async (c) => {
   console.log(`Knife ready as ${c.user.tag} — prefix "${PREFIX}"`);
-  void registerVanitySlashCommands(c);
+  void clearGlobalApplicationCommands();
   try {
     await loadEconomyGuildEnvConfig();
     console.log("Economy env (shop + partner guilds for boost) loaded.");
@@ -191,10 +187,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
     (await isGuildAccessBlocked(interaction.guildId))
   ) {
     return;
-  }
-  if (interaction.isChatInputCommand()) {
-    const slashVanity = await handleVanitySlashCommand(interaction);
-    if (slashVanity) return;
   }
   if (interaction.isButton()) {
     const vanityHandled = await handleVanityButton(interaction);

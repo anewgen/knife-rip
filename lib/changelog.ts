@@ -35,6 +35,24 @@ export function formatChangelogDateEst(isoDate: string): string {
 
 export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   {
+    id: "2026-04-08-v42-economy-expansion",
+    catalogVersion: 42,
+    date: "2026-04-08",
+    title: "Knife Cash expansion: work, bank, pets, PvP",
+    summary:
+      "Major economy layer: work, crime, beg, mine and fish gathering, bank deposit or withdraw with lazy interest and tiers, passive businesses, pets with a button menu and small gamble multipliers, guild-only rob, stake duels with treasury rake, and bounties paid on successful robberies. Fees route to a configurable treasury user. Command catalog v42; migration 20260416150000_economy_expansion_v2.",
+    bullets: [],
+  },
+  {
+    id: "2026-04-09-v41-vanity-prefix-only",
+    catalogVersion: 41,
+    date: "2026-04-09",
+    title: "Vanity: prefix only (.vanities)",
+    summary:
+      "The /vanities Discord slash command was removed; use .vanities / .vanity drop and .vanity search instead. Command catalog v41.",
+    bullets: [],
+  },
+  {
     id: "2026-04-08-docs-overhaul",
     catalogVersion: 40,
     date: "2026-04-08",
@@ -47,9 +65,9 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
     id: "2026-04-08-v40-vanity-slash",
     catalogVersion: 40,
     date: "2026-04-08",
-    title: "Vanity: /vanities slash command",
+    title: "Vanity scanner (prefix)",
     summary:
-      "Knife Pro vanity scanner is available as slash /vanities with subcommands drop and search, in addition to prefix .vanity. Re-invite the bot with the applications.commands scope if the command does not appear.",
+      "Knife Pro vanity scanning uses prefix .vanity search, .vanity drop, and .vanities (recent drops with buttons). Background scans use VANITY_SCANNER_ENABLED=1.",
     bullets: [],
   },
   {

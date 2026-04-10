@@ -10,7 +10,7 @@ import {
   type MessageActionRowComponentBuilder,
 } from "discord.js";
 import { getBotPrisma } from "../db-prisma";
-import { economyPayoutMultiplier } from "./boost";
+import { resolvePayoutMultiplier } from "./payout-multiplier";
 import { ECON_INTERACTION_PREFIX } from "./config";
 import { ecoBtn, ecoM } from "./custom-emojis";
 import { applyGambleOutcomeInTx } from "./gamble-outcome";
@@ -260,7 +260,7 @@ export async function handleMinesPick(params: {
   if (safeLeft <= 0) {
     const member =
       (await guild?.members.fetch(userId).catch(() => null)) ?? null;
-    const mult = await economyPayoutMultiplier(member, userId, client);
+    const mult = await resolvePayoutMultiplier({ userId, member, client });
     const mc = multCents(mult);
     const bps = BigInt(payoutBps(gems));
     const payout = (bet * bps * mc) / 1_000_000n;
@@ -326,7 +326,7 @@ export async function handleMinesCash(params: {
     };
   }
 
-  const mult = await economyPayoutMultiplier(member, userId, client);
+  const mult = await resolvePayoutMultiplier({ userId, member, client });
   const mc = multCents(mult);
   const bet = session.bet;
   const bps = BigInt(payoutBps(gems));

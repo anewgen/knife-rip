@@ -19,7 +19,7 @@ loadEnvFiles();
 export const PREFIX = "." as const;
 
 /** Must match site `lib/commands.ts` → `COMMAND_CATALOG_VERSION`. */
-export const COMMAND_CATALOG_VERSION = 40 as const;
+export const COMMAND_CATALOG_VERSION = 42 as const;
 
 export function getDiscordToken(): string {
   const token = process.env.DISCORD_BOT_TOKEN?.trim();
@@ -73,6 +73,12 @@ export function getRapidApiKey(): string | undefined {
 export function getEconomyLogChannelId(): string | undefined {
   const id = process.env.ECONOMY_LOG_CHANNEL_ID?.trim();
   return id && /^\d{17,20}$/.test(id) ? id : undefined;
+}
+
+/** Receives explicit economy fees (rob, rake, work skim, etc.). Override via env. */
+export function getEconomyTreasuryUserId(): string {
+  const id = process.env.ECONOMY_TREASURY_USER_ID?.trim();
+  return id && /^\d{17,20}$/.test(id) ? id : "1490466051987865800";
 }
 
 /** Legacy osu!api v1 (get_user) — https://github.com/ppy/osu-api/wiki */

@@ -1,6 +1,6 @@
 import type { Message } from "discord.js";
 import { getBotPrisma } from "../db-prisma";
-import { economyPayoutMultiplier } from "./boost";
+import { resolvePayoutMultiplier } from "./payout-multiplier";
 import {
   MILESTONE_HIGH_REWARDS,
   MILESTONE_HIGH_THRESHOLDS,
@@ -26,11 +26,11 @@ export function recordEconomyMessageActivity(message: Message): void {
       const uid = message.author.id;
       const guild = message.guild!;
       const member = await guild.members.fetch(uid).catch(() => null);
-      const mult = await economyPayoutMultiplier(
+      const mult = await resolvePayoutMultiplier({
+        userId: uid,
         member,
-        uid,
-        message.client,
-      );
+        client: message.client,
+      });
 
       await prisma.$transaction(async (tx) => {
         const row = await tx.economyUser.upsert({
