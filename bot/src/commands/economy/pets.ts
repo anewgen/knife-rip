@@ -14,7 +14,7 @@ export const petsCommand: KnifeCommand = {
     categoryId: "gambling",
     categoryTitle: "Gambling & economy",
     categoryDescription:
-      "Knife Cash (global wallet), shop, house games, and transfers — virtual currency for fun.",
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
     usage: ".pets",
     tier: "free",
     style: "prefix",

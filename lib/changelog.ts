@@ -35,6 +35,15 @@ export function formatChangelogDateEst(isoDate: string): string {
 
 export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   {
+    id: "2026-04-10-v44-canonical-economy",
+    catalogVersion: 44,
+    date: "2026-04-10",
+    title: "Commands page: full economy catalog",
+    summary:
+      "Canonical /commands entries now include work, crime, beg, bank, deposit, withdraw, business, mine, fish, pet, pets, rob, duel, and bounty, with an updated Gambling & economy category blurb. Command catalog v44.",
+    bullets: [],
+  },
+  {
     id: "2026-04-10-v43-pet-species",
     catalogVersion: 43,
     date: "2026-04-10",

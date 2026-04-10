@@ -134,12 +134,12 @@ const CANONICAL_UNSORTED: CanonicalCommandSiteRow[] = [
     categoryId: "gambling",
     categoryTitle: "Gambling & economy",
     categoryDescription:
-      "Knife Cash (global wallet), shop, house games, and transfers — virtual currency for fun.",
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
   },
   {
     name: "cash",
     description:
-      "Show your global Knife Cash balance (or another user’s); bonus line if +20% earnings apply",
+      "Show your global Knife Cash balance (or another user’s); shows payout multiplier when boost, Pro, or an equipped pet applies (capped)",
     usage: ".cash · .bal · .balance · .wallet [@user | ID]",
     tier: "free",
     style: "prefix",
@@ -147,7 +147,7 @@ const CANONICAL_UNSORTED: CanonicalCommandSiteRow[] = [
     categoryId: "gambling",
     categoryTitle: "Gambling & economy",
     categoryDescription:
-      "Knife Cash (global wallet), shop, house games, and transfers — virtual currency for fun.",
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
   },
   {
     name: "gamble",
@@ -160,7 +160,7 @@ const CANONICAL_UNSORTED: CanonicalCommandSiteRow[] = [
     categoryId: "gambling",
     categoryTitle: "Gambling & economy",
     categoryDescription:
-      "Knife Cash (global wallet), shop, house games, and transfers — virtual currency for fun.",
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
   },
   {
     name: "gcash",
@@ -173,7 +173,7 @@ const CANONICAL_UNSORTED: CanonicalCommandSiteRow[] = [
     categoryId: "gambling",
     categoryTitle: "Gambling & economy",
     categoryDescription:
-      "Knife Cash (global wallet), shop, house games, and transfers — virtual currency for fun.",
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
   },
   {
     name: "luckydrop",
@@ -186,7 +186,7 @@ const CANONICAL_UNSORTED: CanonicalCommandSiteRow[] = [
     categoryId: "gambling",
     categoryTitle: "Gambling & economy",
     categoryDescription:
-      "Knife Cash (global wallet), shop, house games, and transfers — virtual currency for fun.",
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
   },
   {
     name: "messagedrop",
@@ -200,7 +200,174 @@ const CANONICAL_UNSORTED: CanonicalCommandSiteRow[] = [
     categoryId: "gambling",
     categoryTitle: "Gambling & economy",
     categoryDescription:
-      "Knife Cash (global wallet), shop, house games, and transfers — virtual currency for fun.",
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
+  },
+  {
+    name: "bank",
+    description:
+      "View bank balance, tier cap, and lazy interest — or .bank upgrade for a higher cap",
+    usage: ".bank · .bank upgrade",
+    tier: "free",
+    style: "prefix",
+    categoryId: "gambling",
+    categoryTitle: "Gambling & economy",
+    categoryDescription:
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
+  },
+  {
+    name: "beg",
+    description:
+      "Beg for a tiny Knife Cash tip (short cooldown, often nothing)",
+    usage: ".beg",
+    tier: "free",
+    style: "prefix",
+    categoryId: "gambling",
+    categoryTitle: "Gambling & economy",
+    categoryDescription:
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
+  },
+  {
+    name: "bounty",
+    description:
+      "Post Knife Cash on someone's head — paid automatically if you successfully .rob them here (treasury holds escrow)",
+    usage: ".bounty @user <amount> · .bounty list · .bounty cancel",
+    tier: "free",
+    style: "prefix",
+    categoryId: "gambling",
+    categoryTitle: "Gambling & economy",
+    categoryDescription:
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
+  },
+  {
+    name: "business",
+    description:
+      "Passive Knife Cash businesses — .business buy, .business collect, .business list",
+    usage: ".business buy <id> · .business collect · .business list",
+    tier: "free",
+    style: "prefix",
+    categoryId: "gambling",
+    categoryTitle: "Gambling & economy",
+    categoryDescription:
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
+  },
+  {
+    name: "crime",
+    description:
+      "Risky Knife Cash job — negative EV; fines go to the treasury on failure",
+    usage: ".crime",
+    tier: "free",
+    style: "prefix",
+    categoryId: "gambling",
+    categoryTitle: "Gambling & economy",
+    categoryDescription:
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
+  },
+  {
+    name: "deposit",
+    description:
+      "Move Knife Cash from wallet into the bank (lazy interest, tier cap)",
+    usage: ".deposit <amount>",
+    tier: "free",
+    style: "prefix",
+    categoryId: "gambling",
+    categoryTitle: "Gambling & economy",
+    categoryDescription:
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
+  },
+  {
+    name: "duel",
+    description:
+      "Challenge someone to a Knife Cash stake duel (guild only; opponent accepts with a button)",
+    usage: ".duel @user <amount>",
+    tier: "free",
+    style: "prefix",
+    categoryId: "gambling",
+    categoryTitle: "Gambling & economy",
+    categoryDescription:
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
+  },
+  {
+    name: "fish",
+    description:
+      "Knife Cash — gathering: fish for small payouts (separate cooldown from .mine)",
+    usage: ".fish",
+    tier: "free",
+    style: "prefix",
+    categoryId: "gambling",
+    categoryTitle: "Gambling & economy",
+    categoryDescription:
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
+  },
+  {
+    name: "mine",
+    description:
+      "Knife Cash — gathering: mine ore (not the casino Mines game — use .gamble for that)",
+    usage: ".mine",
+    tier: "free",
+    style: "prefix",
+    categoryId: "gambling",
+    categoryTitle: "Gambling & economy",
+    categoryDescription:
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
+  },
+  {
+    name: "pet",
+    description:
+      "Buy, equip, or feed Knife Cash pets — .pet buy, .pet equip, .pet feed",
+    usage: ".pet buy <dog|cat|rabbit> · .pet equip <species> · .pet feed",
+    tier: "free",
+    style: "prefix",
+    categoryId: "gambling",
+    categoryTitle: "Gambling & economy",
+    categoryDescription:
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
+  },
+  {
+    name: "pets",
+    description: "Knife Cash pets — button menu (equip / feed)",
+    usage: ".pets",
+    tier: "free",
+    style: "prefix",
+    categoryId: "gambling",
+    categoryTitle: "Gambling & economy",
+    categoryDescription:
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
+  },
+  {
+    name: "rob",
+    description:
+      "Try to steal Knife Cash from another member (guild only, high fail rate)",
+    usage: ".rob @user",
+    tier: "free",
+    style: "prefix",
+    categoryId: "gambling",
+    categoryTitle: "Gambling & economy",
+    categoryDescription:
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
+  },
+  {
+    name: "withdraw",
+    description:
+      "Move Knife Cash from bank to wallet (applies lazy interest first)",
+    usage: ".withdraw <amount>",
+    tier: "free",
+    style: "prefix",
+    categoryId: "gambling",
+    categoryTitle: "Gambling & economy",
+    categoryDescription:
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
+  },
+  {
+    name: "work",
+    description:
+      "Work for a small Knife Cash payout (long cooldown, treasury skim)",
+    usage: ".work",
+    tier: "free",
+    style: "prefix",
+    categoryId: "gambling",
+    categoryTitle: "Gambling & economy",
+    categoryDescription:
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
   },
   {
     name: "handout",
@@ -273,7 +440,7 @@ const CANONICAL_UNSORTED: CanonicalCommandSiteRow[] = [
     categoryId: "gambling",
     categoryTitle: "Gambling & economy",
     categoryDescription:
-      "Knife Cash (global wallet), shop, house games, and transfers — virtual currency for fun.",
+      "Global Knife Cash — .gamble hub, shop, daily, work/crime/beg, bank & businesses, gathering (.mine / .fish), pets, pay, and guild .rob / .duel / .bounty. Virtual currency for fun.",
   },
   {
     name: "emoji",
