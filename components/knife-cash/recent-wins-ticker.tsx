@@ -50,48 +50,44 @@ export function RecentWinsTicker() {
 
   return (
     <section
-      className="rounded-2xl border border-amber-500/15 bg-black/40 px-3 py-3 shadow-inner sm:px-4"
+      className="rounded-xl border border-white/[0.06] bg-black/30 px-4 py-3"
       aria-label="Recent wins"
     >
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-200/80">
-          <Icon icon="mdi:fire" className="size-4 text-orange-400" />
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">
           Recent wins
         </h3>
         <button
           type="button"
           onClick={() => void load()}
-          className="inline-flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.04] px-2 py-1 text-[10px] font-medium text-muted hover:border-amber-500/25 hover:text-foreground"
+          className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted transition-colors hover:bg-white/[0.04] hover:text-foreground"
         >
-          <Icon icon="mdi:refresh" className="size-3.5" />
+          <Icon icon="mdi:refresh" className="size-3.5" aria-hidden />
           Refresh
         </button>
       </div>
 
       {err ? (
-        <p className="text-xs text-muted">{err}</p>
+        <p className="text-sm text-muted">{err}</p>
       ) : wins.length === 0 ? (
-        <p className="text-xs text-muted">
-          No wins logged yet — be the first on the board.
-        </p>
+        <p className="text-sm text-muted">No wins yet — take a seat.</p>
       ) : (
-        <div className="-mx-1 flex gap-2 overflow-x-auto pb-1 pt-0.5">
+        <div className="-mx-1 flex gap-2 overflow-x-auto pb-0.5">
           {wins.map((w, i) => (
             <motion.div
               key={`${w.at}-${w.player}-${i}`}
-              initial={reduce ? undefined : { opacity: 0, scale: 0.96 }}
-              animate={reduce ? undefined : { opacity: 1, scale: 1 }}
-              transition={{ delay: Math.min(i * 0.03, 0.35) }}
-              className="min-w-[9.5rem] shrink-0 rounded-xl border border-amber-500/10 bg-gradient-to-b from-amber-950/30 to-black/50 px-3 py-2 shadow-sm"
+              initial={reduce ? undefined : { opacity: 0, y: 4 }}
+              animate={reduce ? undefined : { opacity: 1, y: 0 }}
+              transition={{ delay: Math.min(i * 0.02, 0.2) }}
+              className="min-w-[8.5rem] shrink-0 rounded-lg border border-white/[0.06] bg-zinc-950/80 px-3 py-2"
             >
-              <p className="text-[10px] font-medium uppercase tracking-wide text-amber-200/65">
-                {w.game}
-              </p>
-              <p className="mt-1 font-mono text-sm font-semibold text-emerald-300/95">
+              <p className="text-[11px] font-medium text-muted">{w.game}</p>
+              <p className="mt-0.5 font-mono text-sm font-semibold text-edge">
                 {w.profit}
               </p>
-              <p className="mt-0.5 text-[10px] text-muted">
-                {w.player} · {timeAgo(w.at)}
+              <p className="mt-1 text-[11px] leading-snug text-muted">
+                {w.player}
+                <span className="text-muted/70"> · {timeAgo(w.at)}</span>
               </p>
             </motion.div>
           ))}

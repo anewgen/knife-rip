@@ -77,30 +77,20 @@ export function SlotMachineGame({
   }, [bet, onBalancesUpdated, reduce]);
 
   return (
-    <Card
-      padding="lg"
-      elevated
-      className="relative overflow-hidden border-amber-500/12 bg-gradient-to-b from-violet-950/35 via-purple-950/15 to-black/55 shadow-[0_0_52px_-14px_rgba(234,179,8,0.15)]"
-    >
-      <div
-        className="pointer-events-none absolute -right-10 bottom-0 h-44 w-44 rounded-full bg-violet-500/15 blur-3xl"
-        aria-hidden
-      />
-      <h2 className="relative flex items-center gap-2 font-display text-lg font-semibold text-accent-strong">
-        <Icon icon="mdi:slot-machine" className="size-6 text-violet-300/90" />
+    <Card padding="lg" className="border-white/[0.06] bg-zinc-950/40">
+      <h2 className="font-display text-base font-semibold text-foreground">
         Slots
       </h2>
-      <p className="relative mt-1 text-sm text-muted">
-        Three reels, same symbols and payouts as the Discord hub — triple{" "}
-        <strong className="text-foreground/90">5×</strong>, any pair{" "}
-        <strong className="text-foreground/90">1.5×</strong> (min 1 cash returned).
+      <p className="mt-1 text-sm text-muted">
+        Three reels · triple <span className="text-foreground/90">5×</span> · pair{" "}
+        <span className="text-foreground/90">1.5×</span> (min 1 back)
       </p>
 
-      <div className="relative mx-auto mt-8 flex max-w-md justify-center gap-2 rounded-2xl border border-white/[0.1] bg-black/50 px-3 py-6 shadow-inner sm:gap-3 sm:px-5">
+      <div className="relative mx-auto mt-6 flex max-w-md justify-center gap-2 rounded-xl border border-white/[0.08] bg-black/40 px-3 py-5 sm:gap-3 sm:px-4">
         {reels.map((sym, i) => (
           <motion.div
             key={`col-${i}`}
-            className="flex h-28 flex-1 items-center justify-center overflow-hidden rounded-xl border border-white/[0.08] bg-gradient-to-b from-slate-900/90 to-black/80 sm:h-32"
+            className="flex h-24 flex-1 items-center justify-center overflow-hidden rounded-lg border border-white/[0.06] bg-zinc-900/80 sm:h-28"
             animate={
               spinning && !reduce
                 ? { y: [0, -6, 0], filter: ["blur(0px)", "blur(1px)", "blur(0px)"] }
@@ -120,16 +110,16 @@ export function SlotMachineGame({
       </div>
 
       <div className="relative mt-6 flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-muted">Bet (wallet)</span>
+        <label className="flex min-w-[9rem] flex-col gap-1.5 text-sm">
+          <span className="text-muted">Bet</span>
           <input
             value={bet}
             onChange={(e) => setBet(e.target.value)}
             inputMode="numeric"
             pattern="[0-9]*"
-            placeholder="Amount"
+            placeholder="Wallet amount"
             disabled={busy}
-            className="min-w-[10rem] rounded-lg border border-white/[0.12] bg-black/35 px-3 py-2 font-mono text-sm text-foreground outline-none ring-edge/30 focus:ring-2 disabled:opacity-50"
+            className="rounded-lg border border-white/[0.1] bg-black/50 px-3 py-2.5 font-mono text-sm text-foreground outline-none ring-edge/25 focus:ring-2 disabled:opacity-50"
           />
         </label>
         <Button

@@ -88,24 +88,13 @@ export function CoinFlipGame({
   return (
     <Card
       padding="lg"
-      elevated
-      className="relative overflow-hidden border-amber-500/15 bg-gradient-to-b from-amber-950/25 via-surface/80 to-black/55 shadow-[0_0_50px_-18px_rgba(234,179,8,0.2)]"
+      className="border-white/[0.06] bg-zinc-950/40"
     >
-      <div
-        className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-edge/10 blur-3xl"
-        aria-hidden
-      />
-      <h2 className="relative flex items-center gap-2 font-display text-lg font-semibold text-accent-strong">
-        <Icon icon="mdi:coin-outline" className="size-6 text-amber-300/90" />
+      <h2 className="font-display text-base font-semibold text-foreground">
         Coin flip
       </h2>
-      <p className="relative mt-1 text-sm text-muted">
-        Realistic 3D-style coin — outcome is server-side. Odds align with the Discord
-        hub (slight house edge scales with rebirth tier).{" "}
-        <span className="inline-flex items-center gap-1 text-foreground/80">
-          <Icon icon="mdi:timer-sand" className="size-3.5" />
-          {webGambleCooldownLabel()} between plays (anti double-tap)
-        </span>
+      <p className="mt-1 text-sm text-muted">
+        Server-side flip · Discord hub odds · {webGambleCooldownLabel()} cooldown
       </p>
 
       <div className="relative mx-auto mt-6 flex justify-center [perspective:900px]">
@@ -140,19 +129,16 @@ export function CoinFlipGame({
       </div>
 
       <div className="relative mt-6 flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="inline-flex items-center gap-1.5 text-muted">
-            <Icon icon="mdi:numeric" className="size-3.5" />
-            Bet (wallet)
-          </span>
+        <label className="flex min-w-[9rem] flex-col gap-1.5 text-sm">
+          <span className="text-muted">Bet</span>
           <input
             value={bet}
             onChange={(e) => setBet(e.target.value)}
             inputMode="numeric"
             pattern="[0-9]*"
-            placeholder="Amount"
+            placeholder="Wallet amount"
             disabled={busy}
-            className="min-w-[10rem] rounded-lg border border-white/[0.12] bg-black/35 px-3 py-2 font-mono text-sm text-foreground outline-none ring-edge/30 focus:ring-2 disabled:opacity-50"
+            className="rounded-lg border border-white/[0.1] bg-black/50 px-3 py-2.5 font-mono text-sm text-foreground outline-none ring-edge/25 focus:ring-2 disabled:opacity-50"
           />
         </label>
         <Button

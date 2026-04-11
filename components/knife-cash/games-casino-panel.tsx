@@ -26,12 +26,12 @@ export function GamesCasinoPanel({
   return (
     <motion.div
       className="space-y-4"
-      initial={reduce ? undefined : { opacity: 0, y: 14 }}
+      initial={reduce ? undefined : { opacity: 0, y: 8 }}
       animate={reduce ? undefined : { opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
     >
       <div
-        className="flex flex-wrap gap-2 rounded-2xl border border-amber-500/20 bg-black/45 p-1.5 shadow-[inset_0_2px_12px_rgba(0,0,0,0.45)] backdrop-blur-sm"
+        className="flex flex-wrap gap-1 rounded-xl border border-white/[0.06] bg-black/40 p-1"
         role="tablist"
         aria-label="Knife Cash games"
       >
@@ -42,20 +42,19 @@ export function GamesCasinoPanel({
             variant={tab === t.id ? "primary" : "ghost"}
             onClick={() => setTab(t.id)}
             className={cn(
-              "relative flex-1 min-w-[5.5rem] gap-2 border border-transparent sm:flex-initial",
-              tab === t.id &&
-                "border-amber-400/35 shadow-[0_0_28px_-10px_rgba(234,179,8,0.55)]",
+              "relative flex-1 min-w-[5.5rem] gap-2 sm:flex-initial",
+              tab === t.id && "shadow-sm",
             )}
             role="tab"
             aria-selected={tab === t.id}
           >
-            <Icon icon={t.icon} className="size-4" />
+            <Icon icon={t.icon} className="size-4" aria-hidden />
             {t.label}
             {tab === t.id && !reduce ? (
               <motion.span
                 layoutId="knifeCashTabGlow"
-                className="pointer-events-none absolute inset-0 rounded-lg ring-1 ring-edge/25"
-                transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                className="pointer-events-none absolute inset-0 rounded-lg ring-1 ring-white/10"
+                transition={{ type: "spring", stiffness: 400, damping: 34 }}
               />
             ) : null}
           </Button>
@@ -66,20 +65,10 @@ export function GamesCasinoPanel({
         <motion.div
           key={tab}
           role="tabpanel"
-          initial={
-            reduce
-              ? undefined
-              : { opacity: 0, x: 16, filter: "blur(4px)" }
-          }
-          animate={
-            reduce ? undefined : { opacity: 1, x: 0, filter: "blur(0px)" }
-          }
-          exit={
-            reduce
-              ? undefined
-              : { opacity: 0, x: -12, filter: "blur(3px)" }
-          }
-          transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+          initial={reduce ? undefined : { opacity: 0, y: 6 }}
+          animate={reduce ? undefined : { opacity: 1, y: 0 }}
+          exit={reduce ? undefined : { opacity: 0, y: -4 }}
+          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
         >
           {tab === "coin" ? (
             <CoinFlipGame onBalancesUpdated={onBalancesUpdated} />

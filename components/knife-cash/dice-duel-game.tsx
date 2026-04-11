@@ -83,22 +83,13 @@ export function DiceDuelGame({
   }, [bet, onBalancesUpdated, reduce]);
 
   return (
-    <Card
-      padding="lg"
-      elevated
-      className="relative overflow-hidden border-amber-500/12 bg-gradient-to-b from-slate-950/80 via-emerald-950/20 to-black/60 shadow-[0_0_48px_-16px_rgba(52,211,153,0.12)]"
-    >
-      <div
-        className="pointer-events-none absolute -left-12 top-0 h-40 w-40 rounded-full bg-blue-500/10 blur-3xl"
-        aria-hidden
-      />
-      <h2 className="relative flex items-center gap-2 font-display text-lg font-semibold text-accent-strong">
-        <Icon icon="mdi:dice-6-outline" className="size-6 text-sky-300/90" />
+    <Card padding="lg" className="border-white/[0.06] bg-zinc-950/40">
+      <h2 className="font-display text-base font-semibold text-foreground">
         Dice duel
       </h2>
-      <p className="relative mt-1 text-sm text-muted">
-        Two casino dice — you vs house. Higher wins **2×**; tie returns your stake
-        (same rules as Discord). Rebirth can nudge a re-roll when you&apos;re behind.
+      <p className="mt-1 text-sm text-muted">
+        You vs house, high roll wins <span className="text-foreground/90">2×</span>;
+        push returns stake. Rebirth can grant a second roll when you trail.
       </p>
 
       <div className="relative mt-6 flex flex-wrap items-center justify-center gap-6 sm:gap-10">
@@ -150,16 +141,16 @@ export function DiceDuelGame({
       </div>
 
       <div className="relative mt-6 flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-muted">Bet (wallet)</span>
+        <label className="flex min-w-[9rem] flex-col gap-1.5 text-sm">
+          <span className="text-muted">Bet</span>
           <input
             value={bet}
             onChange={(e) => setBet(e.target.value)}
             inputMode="numeric"
             pattern="[0-9]*"
-            placeholder="Amount"
+            placeholder="Wallet amount"
             disabled={busy}
-            className="min-w-[10rem] rounded-lg border border-white/[0.12] bg-black/35 px-3 py-2 font-mono text-sm text-foreground outline-none ring-edge/30 focus:ring-2 disabled:opacity-50"
+            className="rounded-lg border border-white/[0.1] bg-black/50 px-3 py-2.5 font-mono text-sm text-foreground outline-none ring-edge/25 focus:ring-2 disabled:opacity-50"
           />
         </label>
         <Button

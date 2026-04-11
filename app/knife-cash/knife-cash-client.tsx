@@ -6,7 +6,6 @@ import { RecentWinsTicker } from "@/components/knife-cash/recent-wins-ticker";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
-import { cn } from "@/lib/cn";
 import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
@@ -34,28 +33,6 @@ type GambleLbRow = {
   netProfitFormatted: string;
   bestStreak: number;
 };
-
-const UPCOMING_GAMES: ReadonlyArray<{
-  icon: string;
-  title: string;
-  subtitle: string;
-}> = [
-  {
-    icon: "mdi:cards-playing-outline",
-    title: "Blackjack",
-    subtitle: "Full hand flow like Discord hub — next on web",
-  },
-  {
-    icon: "mdi:grid",
-    title: "Mines",
-    subtitle: "Rainbet-style grid — same engine as Discord",
-  },
-  {
-    icon: "mdi:bullseye",
-    title: "Roulette",
-    subtitle: "American wheel (red / black / green)",
-  },
-];
 
 const sectionMotion = {
   initial: { opacity: 0, y: 12 },
@@ -136,59 +113,41 @@ export function KnifeCashClient() {
   const m = reduce ? {} : sectionMotion;
 
   return (
-    <main className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-4 py-10 sm:px-6">
-      <motion.div
-        className="flex flex-wrap items-center justify-between gap-3"
+    <main className="relative mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10 lg:max-w-3xl">
+      <motion.header
+        className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
         {...m}
         transition={{ ...sectionMotion.transition, delay: 0.02 }}
       >
-        <div className="flex items-start gap-3">
-          <motion.div
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-edge/30 bg-edge-muted/40 shadow-[0_0_28px_-8px_rgba(220,38,38,0.35)]"
-            initial={reduce ? undefined : { scale: 0.92, rotate: -8 }}
-            animate={reduce ? undefined : { scale: 1, rotate: 0 }}
-            transition={{ type: "spring", stiffness: 400, damping: 22 }}
-          >
-            <Icon
-              icon="mdi:poker-chip"
-              className="size-7 text-edge"
+        <div>
+          <div className="flex items-center gap-3">
+            <div
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-edge/35 bg-edge-muted/30"
               aria-hidden
-            />
-          </motion.div>
-          <div>
-            <h1 className="font-display text-2xl font-bold text-accent-strong">
-              Knife Cash
-            </h1>
-            <p className="mt-1 text-sm text-muted">
-              Same global wallet as Discord — bets use wallet cash only.
-            </p>
-            <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted/90">
-              <Icon icon="mdi:link-variant" className="size-3.5" aria-hidden />
-              <span>
-                Also at{" "}
-                <code className="rounded bg-black/30 px-1 py-px font-mono text-[10px] text-edge/90">
-                  /gamble
-                </code>
-                ,{" "}
-                <code className="rounded bg-black/30 px-1 py-px font-mono text-[10px] text-edge/90">
-                  /cash
-                </code>
-                ,{" "}
-                <code className="rounded bg-black/30 px-1 py-px font-mono text-[10px] text-edge/90">
-                  /economy
-                </code>
-              </span>
-            </p>
+            >
+              <Icon icon="mdi:poker-chip" className="size-6 text-edge" />
+            </div>
+            <div>
+              <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+                Knife Cash
+              </h1>
+              <p className="text-sm text-muted">
+                One wallet with Discord · wallet cash only
+              </p>
+            </div>
           </div>
+          <p className="mt-3 text-xs text-muted/80">
+            Short URLs: /gamble · /cash · /economy
+          </p>
         </div>
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-edge underline decoration-edge/40 underline-offset-2 hover:decoration-edge"
+          className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-foreground transition-colors hover:border-edge/30 hover:bg-edge-muted/20"
         >
-          <Icon icon="mdi:view-dashboard-outline" className="size-4" aria-hidden />
+          <Icon icon="mdi:view-dashboard-outline" className="size-4 text-muted" aria-hidden />
           Dashboard
         </Link>
-      </motion.div>
+      </motion.header>
 
       {meError ? (
         <motion.div {...m} transition={{ ...sectionMotion.transition, delay: 0.05 }}>
@@ -209,30 +168,30 @@ export function KnifeCashClient() {
           {...m}
           transition={{ ...sectionMotion.transition, delay: 0.08 }}
         >
-          <Card padding="lg" elevated className="space-y-3">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
-              <Icon icon="mdi:wallet-outline" className="size-4 text-edge/80" />
-              Your balances
+          <Card padding="lg" className="border-white/[0.06] bg-surface/40">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted">
+              Balances
             </p>
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2">
-              <span className="inline-flex items-center gap-2 text-sm text-muted">
-                <Icon icon="mdi:cash" className="size-4 text-amber-200/90" />
-                Wallet{" "}
-                <span className="font-mono text-foreground">{me.cashFormatted}</span>
-              </span>
-              <span className="inline-flex items-center gap-2 text-sm text-muted">
-                <Icon icon="mdi:bank-outline" className="size-4 text-sky-200/80" />
-                Bank{" "}
-                <span className="font-mono text-foreground">
+            <dl className="mt-4 grid gap-4 sm:grid-cols-3">
+              <div>
+                <dt className="text-xs text-muted">Wallet</dt>
+                <dd className="mt-1 font-mono text-lg font-semibold tabular-nums text-foreground">
+                  {me.cashFormatted}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted">Bank</dt>
+                <dd className="mt-1 font-mono text-lg font-semibold tabular-nums text-foreground">
                   {me.bankCashFormatted}
-                </span>
-              </span>
-              <span className="inline-flex items-center gap-2 text-sm text-muted">
-                <Icon icon="mdi:sigma" className="size-4 text-edge/90" />
-                Total{" "}
-                <span className="font-mono text-edge">{me.totalFormatted}</span>
-              </span>
-            </div>
+                </dd>
+              </div>
+              <div className="sm:border-l sm:border-white/[0.06] sm:pl-4">
+                <dt className="text-xs text-muted">Total</dt>
+                <dd className="mt-1 font-mono text-lg font-semibold tabular-nums text-edge">
+                  {me.totalFormatted}
+                </dd>
+              </div>
+            </dl>
           </Card>
         </motion.div>
       ) : null}
@@ -242,18 +201,14 @@ export function KnifeCashClient() {
           {...m}
           transition={{ ...sectionMotion.transition, delay: 0.1 }}
         >
-          <Card padding="lg" className="space-y-4 border-amber-500/25 bg-amber-500/[0.06]">
-            <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-amber-100/95">
-              <Icon icon="mdi:shield-alert-outline" className="size-6 shrink-0" />
-              Knife Cash disclaimer
+          <Card padding="lg" className="space-y-4 border-edge/20 bg-edge-faint">
+            <h2 className="font-display text-base font-semibold text-foreground">
+              Before you play
             </h2>
-            <ul className="list-inside list-disc space-y-1.5 text-sm leading-relaxed text-muted">
-              <li>Knife Cash is virtual play money for fun — not real currency.</li>
-              <li>
-                You can earn from milestones, dailies, jobs, and games on Discord;
-                bank balances count toward leaderboards.
-              </li>
-              <li>Only wager what you are comfortable losing — play responsibly.</li>
+            <ul className="space-y-2 text-sm leading-relaxed text-muted">
+              <li>Virtual play money only — not real currency.</li>
+              <li>Earn on Discord; bank counts on leaderboards.</li>
+              <li>Wager only what you are okay losing.</li>
             </ul>
             <Button
               type="button"
@@ -276,85 +231,43 @@ export function KnifeCashClient() {
             <GamesCasinoPanel onBalancesUpdated={refreshAll} />
           </CasinoFloor>
 
-          <motion.section
-            className="space-y-3"
-            {...m}
-            transition={{ ...sectionMotion.transition, delay: 0.06 }}
-          >
-            <div className="flex items-center gap-2">
-              <Icon icon="mdi:map-marker-path" className="size-5 text-muted" />
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">
-                Coming next
-              </h2>
-            </div>
-            <p className="text-xs leading-relaxed text-muted">
-              Table games and mines to match Discord + Rainbet-style originals. See{" "}
-              <code className="rounded bg-black/25 px-1 font-mono text-[10px]">
-                lib/economy/web-casino-roadmap.md
-              </code>
-              .
-            </p>
-            <ul className="grid gap-2 sm:grid-cols-2">
-              {UPCOMING_GAMES.map((g) => (
-                <li key={g.title}>
-                  <div
-                    className={cn(
-                      "flex gap-3 rounded-xl border border-white/[0.06] bg-surface/40 px-3 py-3",
-                      "opacity-80",
-                    )}
-                  >
-                    <Icon
-                      icon={g.icon}
-                      className="mt-0.5 size-6 shrink-0 text-muted"
-                      aria-hidden
-                    />
-                    <div>
-                      <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-                        {g.title}
-                        <span title="Coming soon">
-                          <Icon
-                            icon="mdi:lock-clock-outline"
-                            className="size-3.5 text-muted"
-                            aria-hidden
-                          />
-                        </span>
-                      </p>
-                      <p className="mt-0.5 text-xs text-muted">{g.subtitle}</p>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </motion.section>
+          <p className="text-center text-xs text-muted">
+            Blackjack, mines, and roulette are coming to match Discord.
+          </p>
         </>
       )}
 
       <motion.section
-        className="space-y-3"
+        className="space-y-4"
         {...m}
         transition={{ ...sectionMotion.transition, delay: 0.12 }}
       >
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant={lbTab === "balance" ? "primary" : "secondary"}
-            onClick={() => setLbTab("balance")}
-            className="inline-flex items-center gap-2"
-          >
-            <Icon icon="mdi:trophy-outline" className="size-4" />
-            Richest
-          </Button>
-          <Button
-            type="button"
-            variant={lbTab === "gamble" ? "primary" : "secondary"}
-            onClick={() => setLbTab("gamble")}
-            className="inline-flex items-center gap-2"
-          >
-            <Icon icon="mdi:chart-timeline-variant" className="size-4" />
-            Gamble stats
-          </Button>
+        <div>
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">
+            Leaderboards
+          </h2>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant={lbTab === "balance" ? "primary" : "secondary"}
+              onClick={() => setLbTab("balance")}
+              className="gap-2"
+            >
+              <Icon icon="mdi:trophy-outline" className="size-4" aria-hidden />
+              Richest
+            </Button>
+            <Button
+              type="button"
+              variant={lbTab === "gamble" ? "primary" : "secondary"}
+              onClick={() => setLbTab("gamble")}
+              className="gap-2"
+            >
+              <Icon icon="mdi:chart-timeline-variant" className="size-4" aria-hidden />
+              Gamble stats
+            </Button>
+          </div>
         </div>
-        <Card padding="md" className="min-h-[8rem]">
+        <Card padding="md" className="min-h-[8rem] border-white/[0.06]">
           {lbLoading ? (
             <p className="inline-flex items-center gap-2 text-sm text-muted">
               <Icon icon="mdi:autorenew" className="size-4 animate-spin" />
