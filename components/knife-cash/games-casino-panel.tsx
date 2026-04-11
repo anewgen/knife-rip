@@ -2,6 +2,7 @@
 
 import { BlackjackGame } from "@/components/knife-cash/blackjack-game";
 import { CoinFlipGame } from "@/components/knife-cash/coin-flip-game";
+import { MinesGame } from "@/components/knife-cash/mines-game";
 import { ComingSoonCasinoGame } from "@/components/knife-cash/coming-soon-casino-game";
 import { DiceDuelGame } from "@/components/knife-cash/dice-duel-game";
 import { SlotMachineGame } from "@/components/knife-cash/slot-machine-game";
@@ -21,7 +22,7 @@ const TABS = [
     icon: "mdi:cards-playing-outline",
     live: true,
   },
-  { id: "mines" as const, label: "Mines", icon: "mdi:grid", live: false },
+  { id: "mines" as const, label: "Mines", icon: "mdi:grid", live: true },
   {
     id: "roulette" as const,
     label: "Roulette",
@@ -118,10 +119,12 @@ export function GamesCasinoPanel({
             </div>
           ) : null}
           {tab === "mines" ? (
-            <ComingSoonCasinoGame variant="mines" title="Mines" />
+            <div className="rounded-2xl border border-slate-500/15 bg-gradient-to-b from-slate-900/30 to-transparent p-1 shadow-[0_0_40px_-18px_rgba(148,163,184,0.15)]">
+              <MinesGame onBalancesUpdated={onBalancesUpdated} />
+            </div>
           ) : null}
           {tab === "roulette" ? (
-            <ComingSoonCasinoGame variant="roulette" title="Roulette" />
+            <ComingSoonCasinoGame title="Roulette" />
           ) : null}
         </motion.div>
       </AnimatePresence>

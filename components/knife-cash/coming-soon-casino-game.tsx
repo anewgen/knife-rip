@@ -4,26 +4,11 @@ import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/cn";
 import { motion, useReducedMotion } from "framer-motion";
 
-const COPY: Record<"mines" | "roulette", { blurb: string; accent: string }> = {
-  mines: {
-    blurb: "Rainbet-style grid — same bomb math and multipliers as Discord.",
-    accent: "from-slate-900/80 via-emerald-950/40 to-black",
-  },
-  roulette: {
-    blurb: "American wheel — red, black, and green — matching hub payouts.",
-    accent: "from-red-950/30 via-zinc-950/90 to-black",
-  },
-};
-
-export function ComingSoonCasinoGame({
-  variant,
-  title,
-}: {
-  variant: "mines" | "roulette";
-  title: string;
-}) {
+export function ComingSoonCasinoGame({ title }: { title: string }) {
   const reduce = useReducedMotion();
-  const { blurb, accent } = COPY[variant];
+  const accent = "from-red-950/30 via-zinc-950/90 to-black";
+  const blurb =
+    "American wheel — red, black, and green — matching hub payouts.";
 
   return (
     <div
@@ -75,61 +60,23 @@ export function ComingSoonCasinoGame({
         ))}
       </div>
 
-      {variant === "mines" ? (
-        <div className="relative mb-6 mt-5 grid grid-cols-5 gap-1.5 sm:mx-auto sm:max-w-xs">
-          {Array.from({ length: 15 }, (_, i) => (
-            <motion.div
-              key={i}
-              className={cn(
-                "aspect-square rounded-md border text-[10px] font-bold",
-                i % 4 === 0
-                  ? "border-red-500/40 bg-red-950/50 text-red-300/80"
-                  : "border-emerald-500/25 bg-emerald-950/30 text-emerald-200/70",
-              )}
-              animate={
-                reduce || i % 4 === 0
-                  ? undefined
-                  : {
-                      boxShadow: [
-                        "0 0 0 0 rgba(52,211,153,0)",
-                        "0 0 12px 0 rgba(52,211,153,0.25)",
-                        "0 0 0 0 rgba(52,211,153,0)",
-                      ],
-                    }
-              }
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                delay: (i % 7) * 0.12,
-              }}
-            >
-              <span className="flex h-full items-center justify-center">
-                {i % 4 === 0 ? "💣" : "·"}
-              </span>
-            </motion.div>
-          ))}
-        </div>
-      ) : null}
-
-      {variant === "roulette" ? (
-        <div className="relative mb-6 mt-5 flex justify-center">
-          <motion.div
-            className="relative flex h-32 w-32 items-center justify-center rounded-full border-4 border-amber-600/50 bg-[conic-gradient(from_0deg,#1a1a1a_0deg_18deg,#b91c1c_18deg_198deg,#171717_198deg_216deg,#b91c1c_216deg_360deg)] shadow-[inset_0_0_20px_rgba(0,0,0,0.6)]"
-            animate={reduce ? undefined : { rotate: 360 }}
-            transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
-            aria-hidden
+      <div className="relative mb-6 mt-5 flex justify-center">
+        <motion.div
+          className="relative flex h-32 w-32 items-center justify-center rounded-full border-4 border-amber-600/50 bg-[conic-gradient(from_0deg,#1a1a1a_0deg_18deg,#b91c1c_18deg_198deg,#171717_198deg_216deg,#b91c1c_216deg_360deg)] shadow-[inset_0_0_20px_rgba(0,0,0,0.6)]"
+          animate={reduce ? undefined : { rotate: 360 }}
+          transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
+          aria-hidden
+        >
+          <div className="absolute inset-3 rounded-full border border-white/10 bg-zinc-900/95 shadow-inner" />
+          <motion.span
+            className="relative z-[1] text-2xl"
+            animate={reduce ? undefined : { scale: [1, 1.06, 1] }}
+            transition={{ duration: 1.8, repeat: Infinity }}
           >
-            <div className="absolute inset-3 rounded-full border border-white/10 bg-zinc-900/95 shadow-inner" />
-            <motion.span
-              className="relative z-[1] text-2xl"
-              animate={reduce ? undefined : { scale: [1, 1.06, 1] }}
-              transition={{ duration: 1.8, repeat: Infinity }}
-            >
-              🎰
-            </motion.span>
-          </motion.div>
-        </div>
-      ) : null}
+            🎰
+          </motion.span>
+        </motion.div>
+      </div>
 
       <div className="relative text-center">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/35 bg-black/50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-200/90">

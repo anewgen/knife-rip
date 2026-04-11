@@ -16,6 +16,10 @@ import {
   type BJCard,
 } from "@/lib/economy/web-blackjack";
 import {
+  parseWebMinesState,
+  WEB_MINES_SESSION_TTL_MS,
+} from "@/lib/economy/web-mines";
+import {
   assertWebGambleAllowed,
   assertWebGambleCooldown,
   upsertEconomyUserInTx,
@@ -173,8 +177,20 @@ export async function POST(req: NextRequest) {
         const row = await upsertEconomyUserInTx(tx, discordId);
         assertWebGambleAllowed(row, bet);
 
-        let existing = parseWebBlackjackState(row.webBlackjackState);
         const now = Date.now();
+
+        let minesActive = parseWebMinesState(row.webMinesState);
+        if (minesActive && now - minesActive.createdAt > WEB_MINES_SESSION_TTL_MS) {
+          await tx.economyUser.update({
+            where: { discordUserId: discordId },
+            data: { webMinesState: Prisma.DbNull },
+          });
+          minesActive = null;
+        } else if (minesActive) {
+          throw new Error("OTHER_GAME");
+        }
+
+        let existing = parseWebBlackjackState(row.webBlackjackState);
         if (existing && now - existing.createdAt > WEB_BJ_SESSION_TTL_MS) {
           await tx.economyUser.update({
             where: { discordUserId: discordId },
@@ -421,6 +437,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, ...result });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
+    if (msg === "OTHER_GAME") {
+      return jsonError("Finish your Mines round first (or wait for it to expire)", 409);
+    }
     if (msg === "HAND_ACTIVE") {
       return jsonError("You already have a hand — hit, stand, or wait for it to expire", 409);
     }

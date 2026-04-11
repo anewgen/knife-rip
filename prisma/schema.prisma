@@ -291,6 +291,8 @@ model EconomyUser {
   rebirthShop        Json?
   /// In-progress Knife Cash web blackjack hand (server-side). Cleared when the hand ends or expires.
   webBlackjackState  Json?
+  /// In-progress Knife Cash web mines round (server-side). Mine positions stay server-only until the round ends.
+  webMinesState      Json?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
